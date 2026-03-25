@@ -27,6 +27,20 @@ starting_min = focusTime;
 starting_sec = 00;
 isBreak = false;
 
+let currentSessionStartTime = null;
+const logFilePath = require('path').join(require('os').homedir(), 'pomofocus-logs.csv');
+
+function logSession() {
+  if (currentSessionStartTime) {
+    const fs = require('fs');
+    if (!fs.existsSync(logFilePath)) fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type\n");
+    const endTime = new Date();
+    const sessionType = isBreak ? "Break" : "Focus";
+    fs.appendFileSync(logFilePath, `${currentSessionStartTime.toLocaleString()},${endTime.toLocaleString()},${sessionType}\n`);
+    currentSessionStartTime = null;
+  }
+}
+
 function check_timer_text() {
   timer_text = timer.innerHTML.split(":");
   starting_min = parseInt(timer_text[0]);
@@ -45,9 +59,12 @@ document.addEventListener("keyup", (e) => {
 function timerEnd() {
   alarm = new Audio("sound/alarm.mp3");
   alarm.play();
+  logSession();
+  currentSessionStartTime = new Date();
 }
 
 function startTimer() {
+  if (!currentSessionStartTime) currentSessionStartTime = new Date();
   check_timer_text();
   minute = starting_min;
   second = starting_sec;
@@ -105,6 +122,7 @@ function startTimer() {
 function stopTimer() {
   check_timer_text();
   clearInterval(setIntervalFunction);
+  logSession();
 }
 
 function PauseTimer() {
