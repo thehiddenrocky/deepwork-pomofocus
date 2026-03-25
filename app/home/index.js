@@ -58,6 +58,7 @@ function commitLog(note = "") {
     fs.appendFileSync(logFilePath, `${pendingLog.start},${pendingLog.end},${pendingLog.type},${safeNote}\n`);
     console.log("Log appended to:", logFilePath);
     pendingLog = null;
+    updateDailyTotal();
   } else {
     console.log("No pending log to commit");
   }
@@ -83,6 +84,48 @@ document.addEventListener('DOMContentLoaded', () => {
 function logSession() {
   prepareLog();
 }
+
+function updateDailyTotal() {
+  const fs = require('fs');
+  if (!fs.existsSync(logFilePath)) return;
+
+  const today = new Date().toLocaleDateString();
+  const rawData = fs.readFileSync(logFilePath, 'utf8');
+  const lines = rawData.split('\n').slice(1); // Skip header
+
+  let totalMinutes = 0;
+
+  lines.forEach(line => {
+    if (!line.trim()) return;
+    const parts = line.split(',');
+    if (parts.length < 5) return;
+
+    const dateStr = parts[0].trim();
+    const type = parts[4].trim();
+
+    if (dateStr === today && type === "Focus") {
+      try {
+        const start = new Date(parts[0] + ',' + parts[1]);
+        const end = new Date(parts[2] + ',' + parts[3]);
+        if (!isNaN(start) && !isNaN(end)) {
+          totalMinutes += Math.round((end - start) / 60000);
+        }
+      } catch (e) {}
+    }
+  });
+
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  const totalDisplay = document.getElementById("daily-total");
+  if (totalDisplay) {
+    totalDisplay.innerText = `Today: ${hours}h ${mins}m`;
+  }
+}
+
+// Initial update
+document.addEventListener('DOMContentLoaded', () => {
+  updateDailyTotal();
+});
 
 function check_timer_text() {
   timer_text = timer.innerHTML.split(":");
