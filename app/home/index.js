@@ -28,17 +28,60 @@ starting_sec = 00;
 isBreak = false;
 
 let currentSessionStartTime = null;
+let pendingLog = null;
 const logFilePath = require('path').join(require('os').homedir(), 'pomofocus-logs.csv');
 
-function logSession() {
+function prepareLog() {
   if (currentSessionStartTime) {
-    const fs = require('fs');
-    if (!fs.existsSync(logFilePath)) fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type\n");
     const endTime = new Date();
     const sessionType = isBreak ? "Break" : "Focus";
-    fs.appendFileSync(logFilePath, `${currentSessionStartTime.toLocaleString()},${endTime.toLocaleString()},${sessionType}\n`);
+    pendingLog = {
+      start: currentSessionStartTime.toLocaleString(),
+      end: endTime.toLocaleString(),
+      type: sessionType
+    };
     currentSessionStartTime = null;
+    
+    const noteInput = document.getElementById("log-note");
+    if (noteInput) {
+      noteInput.focus();
+    }
   }
+}
+
+function commitLog(note = "") {
+  console.log("Committing log with note:", note);
+  if (pendingLog) {
+    const fs = require('fs');
+    if (!fs.existsSync(logFilePath)) fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
+    const safeNote = note ? `"${note.replace(/"/g, '""')}"` : "";
+    fs.appendFileSync(logFilePath, `${pendingLog.start},${pendingLog.end},${pendingLog.type},${safeNote}\n`);
+    console.log("Log appended to:", logFilePath);
+    pendingLog = null;
+  } else {
+    console.log("No pending log to commit");
+  }
+}
+
+// Add event listener for the note input
+document.addEventListener('DOMContentLoaded', () => {
+  const noteInput = document.getElementById("log-note");
+  console.log("Note input element found:", noteInput !== null);
+  if (noteInput) {
+    noteInput.addEventListener("keydown", (e) => {
+      console.log("Key pressed in note input:", e.key);
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitLog(noteInput.value);
+        noteInput.value = "";
+        noteInput.blur();
+      }
+    });
+  }
+});
+
+function logSession() {
+  prepareLog();
 }
 
 function check_timer_text() {
@@ -50,9 +93,16 @@ function check_timer_text() {
 
 workCount = 0;
 
-document.addEventListener("keyup", (e) => {
-  if (e.key == " ") {
+document.addEventListener("keydown", (e) => {
+  if (e.key === " " && document.activeElement.id !== "log-note") {
     e.preventDefault();
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === " " && document.activeElement.id !== "log-note") {
+    e.preventDefault();
+    start_btn.click();
   }
 });
 
@@ -64,6 +114,7 @@ function timerEnd() {
 }
 
 function startTimer() {
+  if (pendingLog) commitLog(""); // flush any previous pending log if start is clicked without writing note
   if (!currentSessionStartTime) currentSessionStartTime = new Date();
   check_timer_text();
   minute = starting_min;
