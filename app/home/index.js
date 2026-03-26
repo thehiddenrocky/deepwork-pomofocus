@@ -344,6 +344,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const indicator = document.getElementById("alarm-indicator");
   if (indicator) {
     indicator.addEventListener("click", stopAlarm);
+    indicator.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        stopAlarm();
+      }
+    });
   }
 });
 
