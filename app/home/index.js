@@ -217,8 +217,70 @@ function check_timer_text() {
 workCount = 0;
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === " " && document.activeElement.id !== "log-note") {
+  const inNote = document.activeElement.id === "log-note";
+
+  // Escape to blur the note input
+  if (e.key === "Escape" && inNote) {
+    document.activeElement.blur();
+    return;
+  }
+
+  // Focus note shortcut: / or Cmd/Ctrl + N
+  const ctrlOrCmd = e.ctrlKey || e.metaKey;
+  if (!inNote && (e.key === "/" || (ctrlOrCmd && e.key.toLowerCase() === "n"))) {
     e.preventDefault();
+    const noteInput = document.getElementById("log-note");
+    if (noteInput) noteInput.focus();
+    return;
+  }
+
+  // Ignore other shortcuts when typing in the note
+  if (inNote) return;
+
+  if (e.key === " ") {
+    e.preventDefault(); // Prevent default scrolling for spacebar
+  } else if (ctrlOrCmd && e.key.toLowerCase() === "r") {
+    e.preventDefault();
+    if (start_btn.innerHTML === "Pause") {
+      PauseTimer();
+    }
+    const modeElements = [
+      document.getElementById("focus-mode"),
+      document.getElementById("shortbreak-mode"),
+      document.getElementById("longbreak-mode")
+    ];
+    const activeMode = modeElements.find(el => el && el.classList.contains("change-opacity"));
+    if (activeMode) activeMode.click();
+  } else if (ctrlOrCmd && e.key === "ArrowRight") {
+    e.preventDefault();
+    const modes = ["focus-mode", "shortbreak-mode", "longbreak-mode"];
+    const modeElements = modes.map(id => document.getElementById(id));
+    const currentIndex = modeElements.findIndex(el => el && el.classList.contains("change-opacity"));
+    if (currentIndex !== -1) {
+      const nextIndex = (currentIndex + 1) % modes.length;
+      if (modeElements[nextIndex]) modeElements[nextIndex].click();
+    }
+  } else if (ctrlOrCmd && e.key === "1") {
+    e.preventDefault();
+    const el = document.getElementById("focus-mode");
+    if (el) el.click();
+  } else if (ctrlOrCmd && e.key === "2") {
+    e.preventDefault();
+    const el = document.getElementById("shortbreak-mode");
+    if (el) el.click();
+  } else if (ctrlOrCmd && e.key === "3") {
+    e.preventDefault();
+    const el = document.getElementById("longbreak-mode");
+    if (el) el.click();
+  } else if (ctrlOrCmd && e.key === ",") {
+    e.preventDefault();
+    ipcRenderer.send("openSettings");
+  } else if (ctrlOrCmd && e.key.toLowerCase() === "m") {
+    e.preventDefault();
+    ipcRenderer.send("minApp");
+  } else if (ctrlOrCmd && e.key.toLowerCase() === "q") {
+    e.preventDefault();
+    ipcRenderer.send("closeApp");
   }
 });
 

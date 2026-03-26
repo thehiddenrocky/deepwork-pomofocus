@@ -46,3 +46,10 @@ save_btn.addEventListener("click", () => {
   ipcRenderer.send("ReloadMain");
   ipcRenderer.send("closeSetting");
 });
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    ipcRenderer.send("closeSetting");
+  }
+});
