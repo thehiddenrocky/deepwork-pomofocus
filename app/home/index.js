@@ -241,7 +241,7 @@ document.addEventListener("keyup", (e) => {
 });
 
 function timerEnd() {
-  alarm = new Audio("sound/alarm.mp3");
+  alarm = new Audio("sound/singing_bowl.ogg");
   alarm.play();
   logSession();
   currentSessionStartTime = new Date();

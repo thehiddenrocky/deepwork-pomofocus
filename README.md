@@ -11,12 +11,26 @@ Created using Electron.JS
 ![dark_settings](/showoff/dark_settings.png)
 
 ## How to run App
-* clone the git repo and change directory to app
-* run `npm install`
-* run `npm start`.
 
-**If you want to develop this further**
-Some general advice use command: 	`npm run watch`
+1. Clone the repository and navigate to the app directory:
+   ```bash
+   git clone https://github.com/thatsyogeshjjr/PomoFocus.git
+   cd PomoFocus/app
+   ```
+2. Install the required dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the application:
+   ```bash
+   npm start
+   ```
+
+**Development**
+If you want to develop this further, you can use the watch command:
+```bash
+npm run watch
+```
 This will update the app live as you change data.
 
 ## Application Info
