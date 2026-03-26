@@ -162,6 +162,7 @@ function updateDailyTotal() {
   const lines = rawData.split('\n').slice(1); // Skip header
 
   let totalMinutes = 0;
+  let sessionCount = 0;
 
   lines.forEach(line => {
     if (!line.trim()) return;
@@ -186,6 +187,7 @@ function updateDailyTotal() {
 
         if (!isNaN(start) && !isNaN(end)) {
           totalMinutes += Math.round((end - start) / 60000);
+          sessionCount++;
         }
       }
     } catch (e) {
@@ -198,7 +200,7 @@ function updateDailyTotal() {
   const mins = totalMinutes % 60;
   const totalDisplay = document.getElementById("daily-total");
   if (totalDisplay) {
-    totalDisplay.innerText = `Today: ${hours}h ${mins}m`;
+    totalDisplay.innerText = `Today: ${hours}h ${mins}m (${sessionCount} deep ${sessionCount === 1 ? 'session' : 'sessions'})`;
   }
 }
 
