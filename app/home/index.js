@@ -48,7 +48,7 @@ let currentSessionStartTime = null;
 let pendingLog = null;
 const logFilePath = require('path').join(require('os').homedir(), 'pomofocus-logs.csv');
 
-function prepareLog() {
+function prepareLog(shouldFocus = true) {
   if (currentSessionStartTime) {
     const endTime = new Date();
     const sessionType = isBreak ? "Break" : "Focus";
@@ -60,7 +60,7 @@ function prepareLog() {
     currentSessionStartTime = null;
 
     const noteInput = document.getElementById("log-note");
-    if (noteInput) {
+    if (shouldFocus && noteInput) {
       noteInput.focus();
     }
   }
@@ -112,7 +112,7 @@ function setupNoteInput() {
           // If no pending log but user is trying to log, create one from current session
           if (currentSessionStartTime) {
             console.log("Creating log from active session");
-            prepareLog();
+            prepareLog(true);
             commitLog(note);
             newInput.value = "";
             newInput.placeholder = "Session note (optional)...";
@@ -149,8 +149,8 @@ if (document.readyState === "loading") {
   setupNoteInput();
 }
 
-function logSession() {
-  prepareLog();
+function logSession(shouldFocus = true) {
+  prepareLog(shouldFocus);
 }
 
 function updateDailyTotal() {
@@ -371,7 +371,7 @@ function startTimer() {
 function stopTimer() {
   check_timer_text();
   clearInterval(setIntervalFunction);
-  logSession();
+  logSession(false);
 }
 
 function PauseTimer() {
