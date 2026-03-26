@@ -80,6 +80,15 @@ body {
   padding: 2px 40px 5px 40px;
 }
 
+.start:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+#log-note:focus {
+  outline: 2px solid #ffffff !important;
+}
+
 /* timer style end */
 
 /* right content stying */
