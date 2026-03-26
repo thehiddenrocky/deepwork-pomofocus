@@ -89,6 +89,22 @@ body {
   outline: 2px solid #ffffff !important;
 }
 
+#log-submit:hover {
+  color: white !important;
+  background-color: #fff4 !important;
+}
+
+#log-submit:focus {
+  color: white !important;
+  background-color: #fff4 !important;
+  box-shadow: 0 0 0 2px #4caf50 !important;
+}
+
+#log-submit.registered {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
 /* timer style end */
 
 /* right content stying */

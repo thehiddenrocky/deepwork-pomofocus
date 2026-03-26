@@ -97,19 +97,30 @@ function setupNoteInput() {
       console.log("Submitting log, note:", note);
       console.log("pendingLog exists:", !!pendingLog);
 
+      const showAcknowledgment = () => {
+        const originalPlaceholder = "Session note (optional)...";
+        noteInput.placeholder = "Registered!";
+        logSubmit.classList.add('registered');
+        
+        setTimeout(() => {
+          noteInput.placeholder = originalPlaceholder;
+          logSubmit.classList.remove('registered');
+        }, 1500);
+      };
+
       if (pendingLog) {
         commitLog(note);
         noteInput.value = "";
-        noteInput.placeholder = "Session note (optional)...";
         noteInput.blur();
+        showAcknowledgment();
       } else if (currentSessionStartTime) {
         console.log("Creating log from active session");
         prepareLog(true);
         commitLog(note);
         noteInput.value = "";
-        noteInput.placeholder = "Session note (optional)...";
         noteInput.blur();
         currentSessionStartTime = new Date();
+        showAcknowledgment();
       } else {
         console.log("No session to log - starting manual log");
         const now = new Date();
@@ -120,8 +131,8 @@ function setupNoteInput() {
         };
         commitLog(note);
         noteInput.value = "";
-        noteInput.placeholder = "Session note (optional)...";
         noteInput.blur();
+        showAcknowledgment();
       }
     };
 
