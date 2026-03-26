@@ -113,9 +113,9 @@ function createWindow() {
   });
 
   // Shortcut keys
-  electronLocalshortcut.register(mainWindow, "Space", () => {
+  /* electronLocalshortcut.register(mainWindow, "Space", () => {
     mainWindow.webContents.send("Pause-timer");
-  });
+  }); */
 }
 
 app.on("ready", createWindow);

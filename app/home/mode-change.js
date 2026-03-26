@@ -15,13 +15,19 @@ element_list = [
 
 // Get Data from JSON file
 const fs = require("fs");
+const path = require("path");
+
+// Use absolute path to config.json (mode-change.js is in app/home/, so .. goes to app/)
+const configPath = path.join(__dirname, '..', 'config.json');
+
 function loadJSON(filename = "") {
   return JSON.parse(
     fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null"
   );
 }
 
-data = loadJSON("config.json");
+data = loadJSON(configPath);
+console.log("mode-change.js loaded config:", data);
 
 function remClassList() {
   console.log(element_list);

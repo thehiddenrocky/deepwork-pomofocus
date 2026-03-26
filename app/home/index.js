@@ -1,16 +1,33 @@
+const fs = require("fs");
+const path = require("path");
+const { ipcRenderer } = require("electron");
+
+// Use absolute path to config.json (home/index.js is in app/home/, so .. goes to app/)
+const configPath = path.join(__dirname, '..', 'config.json');
+
 function loadJSON(filename = "") {
-  return JSON.parse(
-    fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null"
-  );
+  console.log("Loading config from:", filename);
+  console.log("File exists:", fs.existsSync(filename));
+  const content = fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null";
+  console.log("File content:", content);
+  return JSON.parse(content);
 }
-data = loadJSON("config.json");
-console.log(data);
+data = loadJSON(configPath);
+console.log("Loaded data:", data);
+console.log("Focus time from config:", data.time_data.focus_time);
 focusTime = parseInt(data.time_data.focus_time.split(":")[0]); // orig val = 25
 shortBreakTime = parseInt(data.time_data.short_break.split(":")[0]); // orid val = 5
 longBreakTime = parseInt(data.time_data.long_break.split(":")[0]); // orig val = 15
 
 timer = document.getElementById("timer");
-timer.innerHTML = data.time_data.focus_time;
+console.log("Timer element:", timer);
+console.log("Setting timer to:", data.time_data.focus_time);
+if (timer) {
+  timer.innerHTML = data.time_data.focus_time;
+  console.log("Timer innerHTML is now:", timer.innerHTML);
+} else {
+  console.error("Timer element not found!");
+}
 start_btn = document.getElementById("start-btn");
 timer_text = timer.innerHTML.split(":");
 title = document.getElementById("title");
@@ -36,12 +53,12 @@ function prepareLog() {
     const endTime = new Date();
     const sessionType = isBreak ? "Break" : "Focus";
     pendingLog = {
-      start: currentSessionStartTime.toLocaleString(),
-      end: endTime.toLocaleString(),
+      start: currentSessionStartTime,
+      end: endTime,
       type: sessionType
     };
     currentSessionStartTime = null;
-    
+
     const noteInput = document.getElementById("log-note");
     if (noteInput) {
       noteInput.focus();
@@ -52,10 +69,14 @@ function prepareLog() {
 function commitLog(note = "") {
   console.log("Committing log with note:", note);
   if (pendingLog) {
-    const fs = require('fs');
-    if (!fs.existsSync(logFilePath)) fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
+    if (!fs.existsSync(logFilePath)) {
+      fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
+    }
+    // Use ISO string for consistent parsing
+    const startTime = pendingLog.start.toISOString();
+    const endTime = pendingLog.end.toISOString();
     const safeNote = note ? `"${note.replace(/"/g, '""')}"` : "";
-    fs.appendFileSync(logFilePath, `${pendingLog.start},${pendingLog.end},${pendingLog.type},${safeNote}\n`);
+    fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},${safeNote}\n`);
     console.log("Log appended to:", logFilePath);
     pendingLog = null;
     updateDailyTotal();
@@ -64,32 +85,79 @@ function commitLog(note = "") {
   }
 }
 
-// Add event listener for the note input
-document.addEventListener('DOMContentLoaded', () => {
+// Function to setup note input listener
+function setupNoteInput() {
   const noteInput = document.getElementById("log-note");
-  console.log("Note input element found:", noteInput !== null);
+  console.log("Setting up note input, element found:", noteInput !== null);
   if (noteInput) {
-    noteInput.addEventListener("keydown", (e) => {
+    // Remove any existing listeners
+    const newInput = noteInput.cloneNode(true);
+    noteInput.parentNode.replaceChild(newInput, noteInput);
+
+    newInput.addEventListener("keydown", (e) => {
       console.log("Key pressed in note input:", e.key);
       if (e.key === "Enter") {
         e.preventDefault();
-        commitLog(noteInput.value);
-        noteInput.value = "";
-        noteInput.blur();
+        const note = newInput.value.trim();
+        console.log("Enter pressed, note:", note);
+        console.log("pendingLog exists:", !!pendingLog);
+
+        // If there's a pending log, commit it
+        if (pendingLog) {
+          commitLog(note);
+          newInput.value = "";
+          newInput.placeholder = "Session note (optional)...";
+          newInput.blur();
+        } else {
+          // If no pending log but user is trying to log, create one from current session
+          if (currentSessionStartTime) {
+            console.log("Creating log from active session");
+            prepareLog();
+            commitLog(note);
+            newInput.value = "";
+            newInput.placeholder = "Session note (optional)...";
+            newInput.blur();
+            // Restart the session timer
+            currentSessionStartTime = new Date();
+          } else {
+            console.log("No session to log - starting manual log");
+            // Allow manual logging even without a session
+            const now = new Date();
+            pendingLog = {
+              start: now,
+              end: now,
+              type: "Manual"
+            };
+            commitLog(note);
+            newInput.value = "";
+            newInput.placeholder = "Session note (optional)...";
+            newInput.blur();
+          }
+        }
       }
     });
   }
-});
+}
+
+// Setup when DOM is ready
+document.addEventListener('DOMContentLoaded', setupNoteInput);
+
+// Also setup immediately if DOM is already loaded
+if (document.readyState === "loading") {
+  // Will be handled by DOMContentLoaded
+} else {
+  setupNoteInput();
+}
 
 function logSession() {
   prepareLog();
 }
 
 function updateDailyTotal() {
-  const fs = require('fs');
   if (!fs.existsSync(logFilePath)) return;
 
-  const today = new Date().toLocaleDateString();
+  const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
+  console.log("Looking for logs for date:", today);
   const rawData = fs.readFileSync(logFilePath, 'utf8');
   const lines = rawData.split('\n').slice(1); // Skip header
 
@@ -97,23 +165,35 @@ function updateDailyTotal() {
 
   lines.forEach(line => {
     if (!line.trim()) return;
-    const parts = line.split(',');
-    if (parts.length < 5) return;
 
-    const dateStr = parts[0].trim();
-    const type = parts[4].trim();
+    try {
+      // Split carefully to handle quoted notes with commas
+      const csvRegex = /("([^"\\]|\\.)*"|[^,]+)/g;
+      const parts = line.match(csvRegex);
+      if (!parts || parts.length < 3) return;
 
-    if (dateStr === today && type === "Focus") {
-      try {
-        const start = new Date(parts[0] + ',' + parts[1]);
-        const end = new Date(parts[2] + ',' + parts[3]);
+      const startTimeStr = parts[0]?.replace(/"/g, '').trim();
+      const endTimeStr = parts[1]?.replace(/"/g, '').trim();
+      const sessionType = parts[2]?.replace(/"/g, '').trim();
+
+      // Check if this is a Focus session from today
+      const startDate = startTimeStr?.split('T')[0];
+      const isFocus = sessionType === "Focus";
+
+      if (startDate === today && isFocus) {
+        const start = new Date(startTimeStr);
+        const end = new Date(endTimeStr);
+
         if (!isNaN(start) && !isNaN(end)) {
           totalMinutes += Math.round((end - start) / 60000);
         }
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.error("Error parsing line:", line, e);
     }
   });
 
+  console.log("Calculated total focus minutes for today:", totalMinutes);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const totalDisplay = document.getElementById("daily-total");
@@ -142,10 +222,21 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+function toggleTimer() {
+  if (start_btn.innerHTML == "Start") {
+    // Starting the Timer
+    start_btn.innerHTML = "Pause";
+    check_timer_text();
+    startTimer();
+  } else {
+    PauseTimer();
+  }
+}
+
 document.addEventListener("keyup", (e) => {
   if (e.key === " " && document.activeElement.id !== "log-note") {
     e.preventDefault();
-    start_btn.click();
+    toggleTimer();
   }
 });
 
@@ -206,6 +297,8 @@ function startTimer() {
           minute = focusTime;
           second = 0;
         }
+        // Reset daily total display after mode change
+        updateDailyTotal();
       }
     }
     // change timer
@@ -239,11 +332,5 @@ start_btn.addEventListener("click", () => {
 
 // shortcut for pausing
 ipcRenderer.on("Pause-timer", () => {
-  if (start_btn.innerHTML == "Start") {
-    start_btn.innerHTML = "Pause";
-    check_timer_text();
-    startTimer();
-  } else {
-    PauseTimer();
-  }
+  toggleTimer();
 });
