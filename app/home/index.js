@@ -234,11 +234,19 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // Ignore other shortcuts when typing in the note
   if (inNote) return;
 
   if (e.key === " ") {
     e.preventDefault(); // Prevent default scrolling for spacebar
+    toggleTimer();
+  } else if (e.key.toLowerCase() === "k") {
+    // Acknowledge shortcut
+    e.preventDefault();
+    stopAlarm();
+    // If timer is paused, start it. If running, do nothing (just mute).
+    if (start_btn.innerHTML === "Start") {
+      toggleTimer();
+    }
   } else if (ctrlOrCmd && e.key.toLowerCase() === "r") {
     e.preventDefault();
     if (start_btn.innerHTML === "Pause") {
@@ -295,14 +303,17 @@ function toggleTimer() {
   }
 }
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === " " && document.activeElement.id !== "log-note") {
-    e.preventDefault();
-    toggleTimer();
+let alarm = null;
+
+function stopAlarm() {
+  if (alarm) {
+    alarm.pause();
+    alarm.currentTime = 0;
   }
-});
+}
 
 function timerEnd() {
+  stopAlarm();
   alarm = new Audio("sound/singing_bowl.ogg");
   alarm.play();
   logSession();
