@@ -219,6 +219,14 @@ workCount = 0;
 document.addEventListener("keydown", (e) => {
   const inNote = document.activeElement.id === "log-note";
 
+  // Global acknowledge: If alarm is ringing, 'k' stops it without typing in the note
+  if (e.key.toLowerCase() === "k" && alarm && !alarm.paused) {
+    e.preventDefault();
+    e.stopPropagation(); // Stop it from reaching the note input
+    stopAlarm();
+    return;
+  }
+
   // Escape to blur the note input
   if (e.key === "Escape" && inNote) {
     document.activeElement.blur();
@@ -240,7 +248,7 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault(); // Prevent default scrolling for spacebar
     toggleTimer();
   } else if (e.key.toLowerCase() === "k") {
-    // Acknowledge shortcut
+    // Acknowledge shortcut (when alarm is NOT ringing, but still want to start/stop)
     e.preventDefault();
     stopAlarm();
     // If timer is paused, start it. If running, do nothing (just mute).
@@ -290,7 +298,7 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     ipcRenderer.send("closeApp");
   }
-});
+}, true); // Use capture phase so it runs before the note input's own listener
 
 function toggleTimer() {
   if (start_btn.innerHTML == "Start") {
@@ -310,15 +318,34 @@ function stopAlarm() {
     alarm.pause();
     alarm.currentTime = 0;
   }
+  const indicator = document.getElementById("alarm-indicator");
+  if (indicator) {
+    indicator.classList.add("hidden-indicator");
+    indicator.classList.remove("ringing");
+  }
 }
 
 function timerEnd() {
   stopAlarm();
   alarm = new Audio("sound/singing_bowl.ogg");
   alarm.play();
+  
+  const indicator = document.getElementById("alarm-indicator");
+  if (indicator) {
+    indicator.classList.remove("hidden-indicator");
+    indicator.classList.add("ringing");
+  }
+
   logSession();
   currentSessionStartTime = new Date();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const indicator = document.getElementById("alarm-indicator");
+  if (indicator) {
+    indicator.addEventListener("click", stopAlarm);
+  }
+});
 
 function startTimer() {
   if (pendingLog) commitLog(""); // flush any previous pending log if start is clicked without writing note

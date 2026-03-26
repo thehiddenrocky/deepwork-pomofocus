@@ -124,6 +124,25 @@ body {
 .right-content > *:nth-child(even) {
   align-self: flex-end;
 }
+.hidden-indicator {
+  display: none !important;
+}
+
+.ringing {
+  display: block !important;
+  animation: ring 0.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
 /* right content stying -end*/
 
 .top-rt-btn {
