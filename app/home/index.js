@@ -372,6 +372,10 @@ function startTimer() {
         }
         // Reset daily total display after mode change
         updateDailyTotal();
+        // Pause timer so it doesn't automatically start next session
+        PauseTimer();
+        // Ensure the timer displays the full time of the new mode
+        timer.innerHTML = ("0" + minute).slice(-2) + ":" + ("0" + second).slice(-2);
       }
     }
     // change timer
