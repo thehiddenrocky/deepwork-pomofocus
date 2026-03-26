@@ -26,8 +26,13 @@
           <div id="alarm-indicator" class="hidden-indicator" tabindex="0" title="Click or press 'K' to mute" style="position: absolute; right: -40px; top: 30px; font-size: 30px; cursor: pointer; outline: none;">🔔</div>
         </div>
         <button id="start-btn" class="button start btn-change-cursor" >Start</button>
-        <div style="margin-top: 15px;">
-          <input type="text" id="log-note" placeholder="Session note (optional)..." style="width: 100%; padding: 8px; border-radius: 5px; border: none; background: #fff3; color: white; outline: none; display: block;" />
+        <div style="margin-top: 15px; display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="log-note" placeholder="Session note (optional)..." style="flex-grow: 1; padding: 8px; border-radius: 5px; border: none; background: #fff3; color: white; outline: none;" />
+          <div id="log-submit" tabindex="0" title="Log session (Enter)" style="cursor: pointer; font-size: 20px; color: #ffffffb3; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; outline: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #fff3; border-radius: 5px;" 
+            onmouseover="this.style.color='white'; this.style.background='#fff4'" 
+            onmouseout="this.style.color='#ffffffb3'; this.style.background='#fff3'"
+            onfocus="this.style.color='white'; this.style.background='#fff4'; this.style.boxShadow='0 0 0 2px #4caf50'"
+            onblur="this.style.color='#ffffffb3'; this.style.background='#fff3'; this.style.boxShadow='none'">✓</div>
         </div>
       </div>
       <div class="right-content">

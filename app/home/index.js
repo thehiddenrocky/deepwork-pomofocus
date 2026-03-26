@@ -88,52 +88,59 @@ function commitLog(note = "") {
 // Function to setup note input listener
 function setupNoteInput() {
   const noteInput = document.getElementById("log-note");
+  const logSubmit = document.getElementById("log-submit");
   console.log("Setting up note input, element found:", noteInput !== null);
-  if (noteInput) {
-    // Remove any existing listeners
-    const newInput = noteInput.cloneNode(true);
-    noteInput.parentNode.replaceChild(newInput, noteInput);
+  
+  if (noteInput && logSubmit) {
+    const handleLog = () => {
+      const note = noteInput.value.trim();
+      console.log("Submitting log, note:", note);
+      console.log("pendingLog exists:", !!pendingLog);
 
-    newInput.addEventListener("keydown", (e) => {
-      console.log("Key pressed in note input:", e.key);
+      if (pendingLog) {
+        commitLog(note);
+        noteInput.value = "";
+        noteInput.placeholder = "Session note (optional)...";
+        noteInput.blur();
+      } else if (currentSessionStartTime) {
+        console.log("Creating log from active session");
+        prepareLog(true);
+        commitLog(note);
+        noteInput.value = "";
+        noteInput.placeholder = "Session note (optional)...";
+        noteInput.blur();
+        currentSessionStartTime = new Date();
+      } else {
+        console.log("No session to log - starting manual log");
+        const now = new Date();
+        pendingLog = {
+          start: now,
+          end: now,
+          type: "Manual"
+        };
+        commitLog(note);
+        noteInput.value = "";
+        noteInput.placeholder = "Session note (optional)...";
+        noteInput.blur();
+      }
+    };
+
+    // Add click listener to the tick
+    logSubmit.addEventListener("click", handleLog);
+
+    // Add Enter key listener to the tick (for tab navigation)
+    logSubmit.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        const note = newInput.value.trim();
-        console.log("Enter pressed, note:", note);
-        console.log("pendingLog exists:", !!pendingLog);
+        handleLog();
+      }
+    });
 
-        // If there's a pending log, commit it
-        if (pendingLog) {
-          commitLog(note);
-          newInput.value = "";
-          newInput.placeholder = "Session note (optional)...";
-          newInput.blur();
-        } else {
-          // If no pending log but user is trying to log, create one from current session
-          if (currentSessionStartTime) {
-            console.log("Creating log from active session");
-            prepareLog(true);
-            commitLog(note);
-            newInput.value = "";
-            newInput.placeholder = "Session note (optional)...";
-            newInput.blur();
-            // Restart the session timer
-            currentSessionStartTime = new Date();
-          } else {
-            console.log("No session to log - starting manual log");
-            // Allow manual logging even without a session
-            const now = new Date();
-            pendingLog = {
-              start: now,
-              end: now,
-              type: "Manual"
-            };
-            commitLog(note);
-            newInput.value = "";
-            newInput.placeholder = "Session note (optional)...";
-            newInput.blur();
-          }
-        }
+    // Handle Enter inside the input field
+    noteInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleLog();
       }
     });
   }
@@ -151,50 +158,63 @@ if (document.readyState === "loading") {
 
 function logSession(shouldFocus = true) {
   prepareLog(shouldFocus);
+  updateDailyTotal();
 }
 
 function updateDailyTotal() {
-  if (!fs.existsSync(logFilePath)) return;
-
   const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
-  console.log("Looking for logs for date:", today);
-  const rawData = fs.readFileSync(logFilePath, 'utf8');
-  const lines = rawData.split('\n').slice(1); // Skip header
-
-  let totalMinutes = 0;
+  let totalMs = 0;
   let sessionCount = 0;
 
-  lines.forEach(line => {
-    if (!line.trim()) return;
+  if (fs.existsSync(logFilePath)) {
+    console.log("Looking for logs for date:", today);
+    const rawData = fs.readFileSync(logFilePath, 'utf8');
+    const lines = rawData.split('\n').slice(1); // Skip header
 
-    try {
-      // Split carefully to handle quoted notes with commas
-      const csvRegex = /("([^"\\]|\\.)*"|[^,]+)/g;
-      const parts = line.match(csvRegex);
-      if (!parts || parts.length < 3) return;
+    lines.forEach(line => {
+      if (!line.trim()) return;
 
-      const startTimeStr = parts[0]?.replace(/"/g, '').trim();
-      const endTimeStr = parts[1]?.replace(/"/g, '').trim();
-      const sessionType = parts[2]?.replace(/"/g, '').trim();
+      try {
+        // Split carefully to handle quoted notes with commas
+        const csvRegex = /("([^"\\]|\\.)*"|[^,]+)/g;
+        const parts = line.match(csvRegex);
+        if (!parts || parts.length < 3) return;
 
-      // Check if this is a Focus session from today
-      const startDate = startTimeStr?.split('T')[0];
-      const isFocus = sessionType === "Focus";
+        const startTimeStr = parts[0]?.replace(/"/g, '').trim();
+        const endTimeStr = parts[1]?.replace(/"/g, '').trim();
+        const sessionType = parts[2]?.replace(/"/g, '').trim();
 
-      if (startDate === today && isFocus) {
-        const start = new Date(startTimeStr);
-        const end = new Date(endTimeStr);
+        // Check if this is a Focus session from today
+        const startDate = startTimeStr?.split('T')[0];
+        const isFocus = sessionType === "Focus";
 
-        if (!isNaN(start) && !isNaN(end)) {
-          totalMinutes += Math.round((end - start) / 60000);
-          sessionCount++;
+        if (startDate === today && isFocus) {
+          const start = new Date(startTimeStr);
+          const end = new Date(endTimeStr);
+
+          if (!isNaN(start) && !isNaN(end)) {
+            totalMs += (end - start);
+            sessionCount++;
+          }
         }
+      } catch (e) {
+        console.error("Error parsing line:", line, e);
       }
-    } catch (e) {
-      console.error("Error parsing line:", line, e);
-    }
-  });
+    });
+  }
 
+  // Include pending log if it exists and is a Focus session for today
+  if (pendingLog && pendingLog.type === "Focus") {
+    const start = pendingLog.start;
+    const end = pendingLog.end;
+    const startDate = start.toISOString().split('T')[0];
+    if (startDate === today && !isNaN(start) && !isNaN(end)) {
+      totalMs += (end - start);
+      sessionCount++;
+    }
+  }
+
+  const totalMinutes = Math.round(totalMs / 60000);
   console.log("Calculated total focus minutes for today:", totalMinutes);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
@@ -339,7 +359,6 @@ function timerEnd() {
   }
 
   logSession();
-  currentSessionStartTime = new Date();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
