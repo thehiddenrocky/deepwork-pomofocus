@@ -39,6 +39,7 @@ function remClassList() {
 }
 
 focus_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
   if (typeof PauseTimer === "function") PauseTimer();
   timer.innerHTML = data.time_data.focus_time;
   title.innerHTML = "PomoFocus!";
@@ -49,6 +50,7 @@ focus_mode.addEventListener("click", () => {
 });
 
 shortbreak_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
   if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Short Break";
   timer.innerHTML = data.time_data.short_break;
@@ -59,6 +61,7 @@ shortbreak_mode.addEventListener("click", () => {
 });
 
 longbreak_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
   if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Long Break";
   timer.innerHTML = data.time_data.long_break;

@@ -104,6 +104,9 @@ function commitLog(note = "") {
 
 // Commit log on close if it exists
 window.addEventListener('beforeunload', () => {
+  if (currentSessionStartTime) {
+    prepareLog(false);
+  }
   if (pendingLog) {
     // Synchronous call to ensure it finishes before window closes
     commitLog("");
@@ -604,7 +607,13 @@ function startTimer() {
 function stopTimer() {
   check_timer_text();
   clearInterval(setIntervalFunction);
-  logSession(false);
+  // We no longer call logSession here to avoid fragmenting paused sessions
+}
+
+function endSession() {
+  if (typeof logSession === "function") {
+    logSession(false);
+  }
 }
 
 function PauseTimer() {
