@@ -39,24 +39,33 @@ function remClassList() {
 }
 
 focus_mode.addEventListener("click", () => {
+  if (typeof PauseTimer === "function") PauseTimer();
   timer.innerHTML = data.time_data.focus_time;
   title.innerHTML = "PomoFocus!";
   remClassList();
   focus_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = false;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
 });
 
 shortbreak_mode.addEventListener("click", () => {
+  if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Short Break";
   timer.innerHTML = data.time_data.short_break;
   remClassList();
   shortbreak_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = true;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
 });
 
 longbreak_mode.addEventListener("click", () => {
+  if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Long Break";
   timer.innerHTML = data.time_data.long_break;
   remClassList();
   longbreak_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = true;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
 });
 
 setting_button = document.getElementById("settings-mode");

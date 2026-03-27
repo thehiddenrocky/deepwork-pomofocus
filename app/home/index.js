@@ -46,6 +46,21 @@ isBreak = false;
 
 let currentSessionStartTime = null;
 let pendingLog = null;
+try {
+  const storedLog = localStorage.getItem('pendingLog');
+  if (storedLog) {
+    const parsed = JSON.parse(storedLog);
+    pendingLog = {
+      start: new Date(parsed.start),
+      end: new Date(parsed.end),
+      type: parsed.type
+    };
+    console.log("Restored pending log:", pendingLog);
+  }
+} catch (e) {
+  console.error("Error restoring pending log:", e);
+}
+
 const logFilePath = require('path').join(require('os').homedir(), 'pomofocus-logs.csv');
 
 function prepareLog(shouldFocus = true) {
@@ -58,6 +73,7 @@ function prepareLog(shouldFocus = true) {
       type: sessionType
     };
     currentSessionStartTime = null;
+    localStorage.setItem('pendingLog', JSON.stringify(pendingLog));
 
     const noteInput = document.getElementById("log-note");
     if (shouldFocus && noteInput) {
@@ -79,11 +95,20 @@ function commitLog(note = "") {
     fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},${safeNote}\n`);
     console.log("Log appended to:", logFilePath);
     pendingLog = null;
+    localStorage.removeItem('pendingLog');
     updateDailyTotal();
   } else {
     console.log("No pending log to commit");
   }
 }
+
+// Commit log on close if it exists
+window.addEventListener('beforeunload', () => {
+  if (pendingLog) {
+    // Synchronous call to ensure it finishes before window closes
+    commitLog("");
+  }
+});
 
 // Function to setup note input listener
 function setupNoteInput() {
@@ -230,8 +255,89 @@ function updateDailyTotal() {
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const totalDisplay = document.getElementById("daily-total");
+  
   if (totalDisplay) {
-    totalDisplay.innerText = `Today: ${hours}h ${mins}m (${sessionCount} deep ${sessionCount === 1 ? 'session' : 'sessions'})`;
+    const finalDisplayStr = `Today: ${hours}h ${mins}m (${sessionCount} deep ${sessionCount === 1 ? 'session' : 'sessions'})`;
+    
+    // Animate if we've initialized before and the session count increased
+    if (window._lastSessionCount !== undefined && window._lastSessionCount < sessionCount) {
+      
+      // 1. Synthesize Audio
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        try {
+          const audioCtx = new AudioContext();
+          const t = audioCtx.currentTime;
+          
+          // Chug sounds (ratcheting)
+          for (let i = 0; i < 6; i++) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(80 - (i * 5), t + i * 0.1);
+            gain.gain.setValueAtTime(0.05, t + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t + i * 0.1);
+            osc.stop(t + i * 0.1 + 0.05);
+          }
+
+          // Zang sound (bell/coin ring)
+          const zangTime = t + 0.6;
+          const zangOsc = audioCtx.createOscillator();
+          const zangGain = audioCtx.createGain();
+          zangOsc.type = 'sine';
+          zangOsc.frequency.setValueAtTime(880, zangTime); // A5
+          zangOsc.frequency.exponentialRampToValueAtTime(1760, zangTime + 0.1); // Slide to A6
+          zangGain.gain.setValueAtTime(0.15, zangTime);
+          zangGain.gain.exponentialRampToValueAtTime(0.001, zangTime + 0.8);
+          zangOsc.connect(zangGain);
+          zangGain.connect(audioCtx.destination);
+          zangOsc.start(zangTime);
+          zangOsc.stop(zangTime + 0.8);
+        } catch (e) {
+          console.error("Audio playback failed:", e);
+        }
+      }
+
+      // 2. Visual Roulette Animation
+      let iterations = 0;
+      const maxIterations = 15; // 15 cycles * 40ms = 600ms (aligns with zang sound)
+      
+      // Ensure smooth transition back
+      totalDisplay.style.transition = 'none';
+      
+      const interval = setInterval(() => {
+        iterations++;
+        const rH = Math.floor(Math.random() * 10);
+        const rM = Math.floor(Math.random() * 60);
+        const rC = Math.floor(Math.random() * 20);
+        totalDisplay.innerText = `Today: ${rH}h ${rM}m (${rC} deep sessions)`;
+        
+        if (iterations >= maxIterations) {
+          clearInterval(interval);
+          totalDisplay.innerText = finalDisplayStr;
+          
+          // Flash effect
+          totalDisplay.style.color = '#4caf50';
+          totalDisplay.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
+          totalDisplay.style.transform = 'scale(1.05)';
+          totalDisplay.style.transition = 'all 0.3s ease-out';
+          
+          setTimeout(() => {
+            totalDisplay.style.color = '';
+            totalDisplay.style.textShadow = '';
+            totalDisplay.style.transform = '';
+          }, 300);
+        }
+      }, 40);
+
+    } else {
+      totalDisplay.innerText = finalDisplayStr;
+    }
+    
+    window._lastSessionCount = sessionCount;
   }
 }
 
@@ -404,37 +510,32 @@ function startTimer() {
       minute -= 1;
       if (minute <= -1) {
         timerEnd();
-        if (!isBreak) {
-          if (workCount != 0 && workCount % 4 == 0) {
-            // long break
-            ipcRenderer.send("ShowNotification_longbreak");
-            title.innerHTML = "Long Break";
-            count_longbreak += 1;
-            document.getElementById("debug-text").innerHTML = "long break";
-
-            isBreak = true;
-            minute = longBreakTime;
-            second = 0;
-          } else {
-            // short break
-            count_shortbreak += 1;
-            ipcRenderer.send("ShowNotification_shortbreak");
-            document.getElementById("debug-text").innerHTML = "short break";
-            title.innerHTML = "Short Break";
-            isBreak = true;
-            minute = shortBreakTime;
-            second = 0;
-          }
-        } else {
-          ipcRenderer.send("ShowNotification_focus");
-          count_focus += 1;
-          title.innerHTML = "PomoFocus!";
-          document.getElementById("debug-text").innerHTML = "focus time";
-          isBreak = false;
-          workCount += 1;
-          minute = focusTime;
-          second = 0;
+        
+        // Always default back to focus mode after any session ends
+        ipcRenderer.send("ShowNotification_focus");
+        count_focus += 1;
+        title.innerHTML = "PomoFocus!";
+        document.getElementById("debug-text").innerHTML = "focus time";
+        isBreak = false;
+        workCount += 1;
+        minute = focusTime;
+        second = 0;
+        
+        // Visual UI update to match focus mode
+        const focusModeBtn = document.getElementById("focus-mode");
+        if (focusModeBtn && typeof remClassList === "function") {
+          remClassList();
+          focusModeBtn.classList.add("change-opacity");
+        } else if (focusModeBtn) {
+          // Fallback if remClassList isn't in scope (it's in mode-change.js)
+          const modes = ["focus-mode", "shortbreak-mode", "longbreak-mode"];
+          modes.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove("change-opacity");
+          });
+          focusModeBtn.classList.add("change-opacity");
         }
+
         // Reset daily total display after mode change
         updateDailyTotal();
         // Pause timer so it doesn't automatically start next session
