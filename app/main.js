@@ -7,6 +7,7 @@ const {
 } = require("electron");
 const electronLocalshortcut = require("./electron-localshortcut");
 let SettingWin;
+let mainWindow;
 
 // SET ENV
 process.env.NODE_ENV = "production";
@@ -44,79 +45,79 @@ function createWindow() {
     app.quit();
   });
 
-  ipcMain.on("closeApp", () => {
-    mainWindow.close();
-  });
-  ipcMain.on("minApp", () => {
-    mainWindow.minimize();
-  });
-
-  ipcMain.on("openSettings", () => {
-    const isSettingOpened = () =>
-      !SettingWin?.isDestroyed() && SettingWin?.isFocusable();
-    if (isSettingOpened()) {
-      SettingWin.close();
-    }
-
-    SettingWin = new BrowserWindow({
-      parent: mainWindow,
-      height: 500,
-      width: 350,
-      frame: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        devTools: false,
-      },
-      resizable: false,
-    });
-    SettingWin.loadFile("settings/index.html");
-  });
-
-  ipcMain.on("closeSetting", () => {
-    SettingWin.close();
-  });
-  ipcMain.on("minSetting", () => {
-    SettingWin.minimize();
-  });
-  ipcMain.on("ReloadMain", () => {
-    app.relaunch();
-    app.quit();
-  });
-
-  // Notifications
-  ipcMain.on("ShowNotification_focus", () => {
-    NOTIFICATION_TITLE = "PomoFocus!";
-    NOTIFICATION_BODY = "Time to focus up.";
-    new Notification({
-      title: NOTIFICATION_TITLE,
-      body: NOTIFICATION_BODY,
-    }).show();
-  });
-
-  ipcMain.on("ShowNotification_shortbreak", () => {
-    NOTIFICATION_TITLE = "PomoFocus!";
-    NOTIFICATION_BODY = "Short break started.";
-    new Notification({
-      title: NOTIFICATION_TITLE,
-      body: NOTIFICATION_BODY,
-    }).show();
-  });
-
-  ipcMain.on("ShowNotification_longbreak", () => {
-    NOTIFICATION_TITLE = "PomoFocus!";
-    NOTIFICATION_BODY = "Long break started";
-    new Notification({
-      title: NOTIFICATION_TITLE,
-      body: NOTIFICATION_BODY,
-    }).show();
-  });
-
   // Shortcut keys
   /* electronLocalshortcut.register(mainWindow, "Space", () => {
     mainWindow.webContents.send("Pause-timer");
   }); */
 }
+
+ipcMain.on("closeApp", () => {
+  if (mainWindow) mainWindow.close();
+});
+ipcMain.on("minApp", () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.on("openSettings", () => {
+  const isSettingOpened = () =>
+    !SettingWin?.isDestroyed() && SettingWin?.isFocusable();
+  if (isSettingOpened()) {
+    SettingWin.close();
+  }
+
+  SettingWin = new BrowserWindow({
+    parent: mainWindow,
+    height: 500,
+    width: 350,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: false,
+    },
+    resizable: false,
+  });
+  SettingWin.loadFile("settings/index.html");
+});
+
+ipcMain.on("closeSetting", () => {
+  if (SettingWin) SettingWin.close();
+});
+ipcMain.on("minSetting", () => {
+  if (SettingWin) SettingWin.minimize();
+});
+ipcMain.on("ReloadMain", () => {
+  app.relaunch();
+  app.quit();
+});
+
+// Notifications
+ipcMain.on("ShowNotification_focus", () => {
+  NOTIFICATION_TITLE = "PomoFocus!";
+  NOTIFICATION_BODY = "Time to focus up.";
+  new Notification({
+    title: NOTIFICATION_TITLE,
+    body: NOTIFICATION_BODY,
+  }).show();
+});
+
+ipcMain.on("ShowNotification_shortbreak", () => {
+  NOTIFICATION_TITLE = "PomoFocus!";
+  NOTIFICATION_BODY = "Short break started.";
+  new Notification({
+    title: NOTIFICATION_TITLE,
+    body: NOTIFICATION_BODY,
+  }).show();
+});
+
+ipcMain.on("ShowNotification_longbreak", () => {
+  NOTIFICATION_TITLE = "PomoFocus!";
+  NOTIFICATION_BODY = "Long break started";
+  new Notification({
+    title: NOTIFICATION_TITLE,
+    body: NOTIFICATION_BODY,
+  }).show();
+});
 
 app.on("ready", createWindow);
 

@@ -48,8 +48,12 @@ save_btn.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (e) => {
+  const ctrlOrCmd = e.ctrlKey || e.metaKey;
   if (e.key === "Escape") {
     e.preventDefault();
     ipcRenderer.send("closeSetting");
+  } else if (ctrlOrCmd && e.key.toLowerCase() === "r") {
+    e.preventDefault();
+    ipcRenderer.send("ReloadMain");
   }
 });

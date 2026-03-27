@@ -429,7 +429,49 @@ document.addEventListener("keydown", (e) => {
 
   // Focus note shortcut: / or Cmd/Ctrl + N
   const ctrlOrCmd = e.ctrlKey || e.metaKey;
-  if (!inNote && (e.key === "/" || (ctrlOrCmd && e.key.toLowerCase() === "n"))) {
+
+  // Standard App Shortcuts (work even when note input is focused)
+  if (ctrlOrCmd) {
+    if (e.key.toLowerCase() === "r") {
+      e.preventDefault();
+      ipcRenderer.send("ReloadMain");
+      return;
+    } else if (e.key.toLowerCase() === "q") {
+      e.preventDefault();
+      ipcRenderer.send("closeApp");
+      return;
+    } else if (e.key.toLowerCase() === "m") {
+      e.preventDefault();
+      ipcRenderer.send("minApp");
+      return;
+    } else if (e.key === ",") {
+      e.preventDefault();
+      ipcRenderer.send("openSettings");
+      return;
+    } else if (e.key === "1") {
+      e.preventDefault();
+      const el = document.getElementById("focus-mode");
+      if (el) el.click();
+      return;
+    } else if (e.key === "2") {
+      e.preventDefault();
+      const el = document.getElementById("shortbreak-mode");
+      if (el) el.click();
+      return;
+    } else if (e.key === "3") {
+      e.preventDefault();
+      const el = document.getElementById("longbreak-mode");
+      if (el) el.click();
+      return;
+    } else if (e.key.toLowerCase() === "n") {
+      e.preventDefault();
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) noteInput.focus();
+      return;
+    }
+  }
+
+  if (!inNote && e.key === "/") {
     e.preventDefault();
     const noteInput = document.getElementById("log-note");
     if (noteInput) noteInput.focus();
@@ -449,18 +491,6 @@ document.addEventListener("keydown", (e) => {
     if (start_btn.innerHTML === "Start") {
       toggleTimer();
     }
-  } else if (ctrlOrCmd && e.key.toLowerCase() === "r") {
-    e.preventDefault();
-    if (start_btn.innerHTML === "Pause") {
-      PauseTimer();
-    }
-    const modeElements = [
-      document.getElementById("focus-mode"),
-      document.getElementById("shortbreak-mode"),
-      document.getElementById("longbreak-mode")
-    ];
-    const activeMode = modeElements.find(el => el && el.classList.contains("change-opacity"));
-    if (activeMode) activeMode.click();
   } else if (ctrlOrCmd && e.key === "ArrowRight") {
     e.preventDefault();
     const modes = ["focus-mode", "shortbreak-mode", "longbreak-mode"];
@@ -470,27 +500,6 @@ document.addEventListener("keydown", (e) => {
       const nextIndex = (currentIndex + 1) % modes.length;
       if (modeElements[nextIndex]) modeElements[nextIndex].click();
     }
-  } else if (ctrlOrCmd && e.key === "1") {
-    e.preventDefault();
-    const el = document.getElementById("focus-mode");
-    if (el) el.click();
-  } else if (ctrlOrCmd && e.key === "2") {
-    e.preventDefault();
-    const el = document.getElementById("shortbreak-mode");
-    if (el) el.click();
-  } else if (ctrlOrCmd && e.key === "3") {
-    e.preventDefault();
-    const el = document.getElementById("longbreak-mode");
-    if (el) el.click();
-  } else if (ctrlOrCmd && e.key === ",") {
-    e.preventDefault();
-    ipcRenderer.send("openSettings");
-  } else if (ctrlOrCmd && e.key.toLowerCase() === "m") {
-    e.preventDefault();
-    ipcRenderer.send("minApp");
-  } else if (ctrlOrCmd && e.key.toLowerCase() === "q") {
-    e.preventDefault();
-    ipcRenderer.send("closeApp");
   }
 }, true); // Use capture phase so it runs before the note input's own listener
 
