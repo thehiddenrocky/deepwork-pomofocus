@@ -126,11 +126,13 @@ function setupNoteInput() {
         const originalPlaceholder = "Session note (optional)...";
         noteInput.placeholder = "Registered!";
         logSubmit.classList.add('registered');
-        
+        noteInput.classList.add('registered-input');
+
         setTimeout(() => {
           noteInput.placeholder = originalPlaceholder;
           logSubmit.classList.remove('registered');
-        }, 1500);
+          noteInput.classList.remove('registered-input');
+        }, 2000);
       };
 
       if (pendingLog) {
@@ -239,17 +241,9 @@ function updateDailyTotal() {
     });
   }
 
-  // Include pending log if it exists and is a Focus session for today
-  if (pendingLog && pendingLog.type === "Focus") {
-    const start = pendingLog.start;
-    const end = pendingLog.end;
-    const startDate = start.toISOString().split('T')[0];
-    if (startDate === today && !isNaN(start) && !isNaN(end)) {
-      totalMs += (end - start);
-      sessionCount++;
-    }
-  }
-
+  // No longer including pendingLog so the count only updates and animates
+  // after the user presses Enter and the log is committed.
+  
   const totalMinutes = Math.round(totalMs / 60000);
   console.log("Calculated total focus minutes for today:", totalMinutes);
   const hours = Math.floor(totalMinutes / 60);
@@ -261,7 +255,9 @@ function updateDailyTotal() {
     
     // Animate if we've initialized before and the session count increased
     if (window._lastSessionCount !== undefined && window._lastSessionCount < sessionCount) {
-      
+      const oldCount = window._lastSessionCount;
+      const difference = sessionCount - oldCount;
+
       // 1. Synthesize Audio
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (AudioContext) {
@@ -301,35 +297,91 @@ function updateDailyTotal() {
         }
       }
 
-      // 2. Visual Roulette Animation
+      // 2. Visual Glitter/Confetti Effect
+      const spawnGlitter = () => {
+        const rect = totalDisplay.getBoundingClientRect();
+        for (let i = 0; i < 30; i++) {
+          const glitter = document.createElement('div');
+          glitter.style.position = 'absolute';
+          glitter.style.width = Math.random() * 6 + 4 + 'px';
+          glitter.style.height = glitter.style.width;
+          const colors = ['#FFD700', '#FF69B4', '#00FF00', '#00BFFF', '#FF4500'];
+          glitter.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          glitter.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+          glitter.style.top = (rect.top + rect.height / 2) + 'px';
+          glitter.style.left = (rect.left + rect.width / 2) + 'px';
+          glitter.style.pointerEvents = 'none';
+          glitter.style.zIndex = '1000';
+          
+          const angle = Math.random() * Math.PI * 2;
+          const velocity = Math.random() * 60 + 20;
+          const vx = Math.cos(angle) * velocity;
+          const vy = Math.sin(angle) * velocity - 30; // slight upward bias
+          
+          document.body.appendChild(glitter);
+          
+          let opacity = 1;
+          let posX = rect.left + rect.width / 2;
+          let posY = rect.top + rect.height / 2;
+          let currentVy = vy;
+          
+          const animateGlitter = () => {
+            if (opacity <= 0) {
+              glitter.remove();
+              return;
+            }
+            posX += vx * 0.1;
+            posY += currentVy * 0.1;
+            currentVy += 5; // gravity
+            opacity -= 0.02;
+            
+            glitter.style.left = posX + 'px';
+            glitter.style.top = posY + 'px';
+            glitter.style.opacity = opacity;
+            glitter.style.transform = `rotate(${posX}deg)`;
+            
+            requestAnimationFrame(animateGlitter);
+          };
+          requestAnimationFrame(animateGlitter);
+        }
+      };
+
+      // 3. Smooth Rolling Animation for the count
       let iterations = 0;
-      const maxIterations = 15; // 15 cycles * 40ms = 600ms (aligns with zang sound)
+      const maxIterations = 15; // align with the zang sound timing
       
-      // Ensure smooth transition back
       totalDisplay.style.transition = 'none';
       
       const interval = setInterval(() => {
         iterations++;
-        const rH = Math.floor(Math.random() * 10);
-        const rM = Math.floor(Math.random() * 60);
-        const rC = Math.floor(Math.random() * 20);
-        totalDisplay.innerText = `Today: ${rH}h ${rM}m (${rC} deep sessions)`;
+        // Show random numbers briefly to simulate rolling, but only for the count part
+        const rC = oldCount + Math.floor(Math.random() * (difference + 2)); 
+        totalDisplay.innerText = `Today: ${hours}h ${mins}m (${rC} deep sessions)`;
         
         if (iterations >= maxIterations) {
           clearInterval(interval);
           totalDisplay.innerText = finalDisplayStr;
           
-          // Flash effect
-          totalDisplay.style.color = '#4caf50';
-          totalDisplay.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
-          totalDisplay.style.transform = 'scale(1.05)';
-          totalDisplay.style.transition = 'all 0.3s ease-out';
+          // Trigger glitter when the final number hits
+          spawnGlitter();
+          
+          // Golden/Green achievement flash effect
+          totalDisplay.style.color = '#FFD700'; // Gold color
+          totalDisplay.style.textShadow = '0 0 15px rgba(255, 215, 0, 1)';
+          totalDisplay.style.transform = 'scale(1.15)';
+          totalDisplay.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // bouncy pop
           
           setTimeout(() => {
-            totalDisplay.style.color = '';
-            totalDisplay.style.textShadow = '';
-            totalDisplay.style.transform = '';
-          }, 300);
+            totalDisplay.style.color = '#4caf50'; // Settle on a success green
+            totalDisplay.style.textShadow = '0 0 8px rgba(76, 175, 80, 0.6)';
+            totalDisplay.style.transform = 'scale(1.02)';
+            
+            setTimeout(() => {
+               totalDisplay.style.color = '';
+               totalDisplay.style.textShadow = '';
+               totalDisplay.style.transform = '';
+            }, 800);
+          }, 400);
         }
       }, 40);
 
