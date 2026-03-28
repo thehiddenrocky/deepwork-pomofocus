@@ -47,6 +47,7 @@ focus_mode.addEventListener("click", () => {
   focus_mode.classList.add("change-opacity");
   if (typeof isBreak !== "undefined") isBreak = false;
   if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 shortbreak_mode.addEventListener("click", () => {
@@ -58,6 +59,7 @@ shortbreak_mode.addEventListener("click", () => {
   shortbreak_mode.classList.add("change-opacity");
   if (typeof isBreak !== "undefined") isBreak = true;
   if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 longbreak_mode.addEventListener("click", () => {
@@ -69,6 +71,7 @@ longbreak_mode.addEventListener("click", () => {
   longbreak_mode.classList.add("change-opacity");
   if (typeof isBreak !== "undefined") isBreak = true;
   if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 setting_button = document.getElementById("settings-mode");

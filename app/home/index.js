@@ -5,6 +5,18 @@ const { ipcRenderer } = require("electron");
 // Use absolute path to config.json (home/index.js is in app/home/, so .. goes to app/)
 const configPath = path.join(__dirname, '..', 'config.json');
 
+window.updateProgressRing = function(currentSeconds, totalSeconds) {
+  const circle = document.getElementById('progress-circle');
+  if (circle) {
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    const percent = Math.max(0, currentSeconds / totalSeconds);
+    const offset = circumference - percent * circumference;
+    circle.style.strokeDashoffset = offset;
+  }
+};
+
 function loadJSON(filename = "") {
   console.log("Loading config from:", filename);
   console.log("File exists:", fs.existsSync(filename));
@@ -195,6 +207,7 @@ if (document.readyState === "loading") {
   // Will be handled by DOMContentLoaded
 } else {
   setupNoteInput();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 }
 
 function logSession(shouldFocus = true) {
@@ -399,6 +412,7 @@ function updateDailyTotal() {
 // Initial update
 document.addEventListener('DOMContentLoaded', () => {
   updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 function check_timer_text() {
@@ -565,7 +579,21 @@ function startTimer() {
 
   // minute = starting_min - 1;
 
+  let currentTotal = minute * 60 + second;
+  let maxFocus = parseInt(data.time_data.focus_time.split(":")[0]) * 60;
+  let maxShort = parseInt(data.time_data.short_break.split(":")[0]) * 60;
+  let maxLong = parseInt(data.time_data.long_break.split(":")[0]) * 60;
+
+  if (!window.totalSessionSeconds || currentTotal === maxFocus || currentTotal === maxShort || currentTotal === maxLong) {
+    window.totalSessionSeconds = currentTotal;
+  }
+  
+  window.updateProgressRing(currentTotal, window.totalSessionSeconds);
+
   let timerFunction = () => {
+    let tickTotal = minute * 60 + second;
+    window.updateProgressRing(tickTotal, window.totalSessionSeconds);
+
     timer.innerHTML = ("0" + minute).slice(-2) + ":" + ("0" + second).slice(-2);
     /* second -= 1;if (second === 0) {minute -= 1;if (minute === -1) {if (workCount % 4 == 0) {longBreak();} else {shortBreak();}}second = 59;}*/
     second--;
@@ -606,6 +634,7 @@ function startTimer() {
         PauseTimer();
         // Ensure the timer displays the full time of the new mode
         timer.innerHTML = ("0" + minute).slice(-2) + ":" + ("0" + second).slice(-2);
+        if (window.updateProgressRing) window.updateProgressRing(1, 1);
       }
     }
     // change timer

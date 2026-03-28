@@ -192,3 +192,10 @@ body {
   border: 1px solid #4caf50 !important;
   transition: all 0.3s ease;
 }
+
+/* Progress Ring Styling */
+.progress-ring__circle {
+  transition: stroke-dashoffset 1s linear;
+  transform-origin: 50% 50%;
+}
+
