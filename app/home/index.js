@@ -97,6 +97,15 @@ function prepareLog(shouldFocus = true) {
 function commitLog(note = "") {
   console.log("Committing log with note:", note);
   if (pendingLog) {
+    // Only commit if the session is > 1 minute OR has a note
+    const durationMs = pendingLog.end.getTime() - pendingLog.start.getTime();
+    if (durationMs < 60000 && (!note || note.trim() === "")) {
+      console.log("Discarding tiny un-noted log fragment.");
+      pendingLog = null;
+      localStorage.removeItem('pendingLog');
+      return;
+    }
+
     if (!fs.existsSync(logFilePath)) {
       fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
     }
@@ -247,8 +256,14 @@ function updateDailyTotal() {
           const end = new Date(endTimeStr);
 
           if (!isNaN(start) && !isNaN(end)) {
-            totalMs += (end - start);
-            sessionCount++;
+            const durationMs = end - start;
+            totalMs += durationMs;
+            
+            // Only count as a "deep session" if it's at least 1 minute long or has a note
+            const noteStr = parts[3] ? parts[3].replace(/"/g, '').trim() : "";
+            if (durationMs >= 60000 || noteStr !== "") {
+              sessionCount++;
+            }
           }
         }
       } catch (e) {
@@ -570,7 +585,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function startTimer() {
-  if (pendingLog) commitLog(""); // flush any previous pending log if start is clicked without writing note
+  // Removed auto-commit of pendingLog here.
+  // The user must manually log the session by entering a note and pressing Enter.
   if (!currentSessionStartTime) currentSessionStartTime = new Date();
   check_timer_text();
   minute = starting_min;
