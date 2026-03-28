@@ -9,6 +9,7 @@
 body {
   background-color: #1c1c1c;
   color: #ffffff;
+  overflow: hidden;
 }
 .button {
   margin: none;
@@ -109,8 +110,8 @@ body {
 
 /* right content stying */
 .right-content {
-  height: 4.5cm;
-  width: 3.1cm;
+  height: 280px;
+  width: 120px;
   background-color: #242424;
   border-radius: 13px;
   /* 

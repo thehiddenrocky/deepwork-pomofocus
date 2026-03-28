@@ -25,7 +25,7 @@ data = loadJSON("config.json");
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 460,
-    height: 275,
+    height: 380,
     frame: false,
     resizable: false,
     webPreferences: {
