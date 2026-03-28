@@ -425,6 +425,27 @@ function updateDailyTotal() {
       if (bigCountDisplay) bigCountDisplay.innerText = sessionCount;
     }
     
+    // Update Daily Goal Circle
+    const goalCircle = document.getElementById("goal-circle");
+    const dailyGoalText = document.getElementById("daily-goal-text");
+    const dailyGoal = data.daily_goal || 50; // Configurable goal
+    if (goalCircle && dailyGoalText) {
+      dailyGoalText.innerText = dailyGoal;
+      const radius = goalCircle.r.baseVal.value;
+      const circumference = 2 * Math.PI * radius;
+      goalCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+      
+      // Calculate progress (capped at 100%)
+      const percent = Math.min(1, sessionCount / dailyGoal);
+      const offset = circumference - percent * circumference;
+      
+      // Give it a tiny delay to animate cleanly after load
+      setTimeout(() => {
+        goalCircle.style.strokeDashoffset = offset;
+        goalCircle.style.stroke = "#256faf"; // Match the main theme color
+      }, 50);
+    }
+    
     window._lastSessionCount = sessionCount;
   }
 }
@@ -697,3 +718,27 @@ start_btn.addEventListener("click", () => {
 ipcRenderer.on("Pause-timer", () => {
   toggleTimer();
 });
+
+// Goal Circle Interactions (since mode icons are hidden)
+document.addEventListener("DOMContentLoaded", () => {
+  const goalContainer = document.getElementById("daily-goal-container");
+  if (goalContainer) {
+    goalContainer.addEventListener("click", (e) => {
+      // Cycle modes on left click
+      const modes = ["focus-mode", "shortbreak-mode", "longbreak-mode"];
+      const modeElements = modes.map(id => document.getElementById(id));
+      const currentIndex = modeElements.findIndex(el => el && el.classList.contains("change-opacity"));
+      if (currentIndex !== -1) {
+        const nextIndex = (currentIndex + 1) % modes.length;
+        if (modeElements[nextIndex]) modeElements[nextIndex].click();
+      }
+    });
+    
+    goalContainer.addEventListener("contextmenu", (e) => {
+      // Open settings on right click
+      e.preventDefault();
+      ipcRenderer.send("openSettings");
+    });
+  }
+});
+

@@ -28,12 +28,6 @@
           </svg>
           <p class="timer" id="timer" style="margin: 0; z-index: 1; font-size: 55px;">25:00</p>
           <div id="alarm-indicator" class="hidden-indicator" tabindex="0" title="Click or press 'K' to mute" style="position: absolute; right: -25px; top: 10px; font-size: 24px; cursor: pointer; outline: none; z-index: 2;">🔔</div>
-          
-          <!-- BIG DEEP SESSIONS NUMBER -->
-          <div title="Deep Sessions Today" style="position: absolute; right: -90px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; width: 60px;">
-            <span id="big-session-count" style="font-size: 46px; font-weight: 800; color: #ffffff; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4); font-variant-numeric: tabular-nums;">0</span>
-            <span style="font-size: 11px; font-weight: 600; color: #ffffff88; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px;">Sessions</span>
-          </div>
         </div>
         <button id="start-btn" class="button start btn-change-cursor" >Start</button>
         <div style="margin-top: 15px; display: flex; align-items: center; gap: 8px;">
@@ -41,11 +35,24 @@
           <div id="log-submit" tabindex="0" title="Log session (Enter)" style="cursor: pointer; font-size: 20px; color: #ffffffb3; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; outline: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #fff3; border-radius: 5px;">✓</div>
         </div>
       </div>
-      <div class="right-content">
-        <span title="Focus mode"><img src="images/time.png" id="focus-mode" class="btn-change-cursor change-opacity" alt="" /></span>
-        <span title="Short break"><img src="images/short-break.png" id="shortbreak-mode"class="btn-change-cursor" alt="" /></span>
-        <span title="Long break"><img src="images/walker.png" id="longbreak-mode"class="btn-change-cursor"alt="" /></span>
-        <span title="Settings"><img src="images/settings.png" id="settings-mode"class="btn-change-cursor"alt="" /></button></span>
+      <div class="right-panel" style="display: flex; align-items: center; justify-content: center; width: 120px; height: 280px; background-color: transparent;">
+        <div style="display: none;">
+          <span title="Focus mode"><img src="images/time.png" id="focus-mode" class="btn-change-cursor change-opacity" alt="" /></span>
+          <span title="Short break"><img src="images/short-break.png" id="shortbreak-mode"class="btn-change-cursor" alt="" /></span>
+          <span title="Long break"><img src="images/walker.png" id="longbreak-mode"class="btn-change-cursor"alt="" /></span>
+          <span title="Settings"><img src="images/settings.png" id="settings-mode"class="btn-change-cursor"alt="" /></span>
+        </div>
+        
+        <!-- Daily Goal Progress Circle -->
+        <div id="daily-goal-container" class="btn-change-cursor" title="Daily Session Goal (Click to cycle modes, Right-click for Settings)" style="position: relative; width: 120px; height: 120px;">
+          <svg width="120" height="120" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+            <circle stroke="#ffffff15" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+            <circle id="goal-circle" stroke="#256faf" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out; stroke-dasharray: 314.159; stroke-dashoffset: 314.159;"/>
+          </svg>
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <span id="big-session-count" style="font-size: 40px; font-weight: 800; color: #ffffff; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">0</span>
+            <span style="font-size: 14px; font-weight: 600; color: #ffffff88; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px;">/ <span id="daily-goal-text">50</span></span>
+          </div>
         </div>
       </div>
     </div>
