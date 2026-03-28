@@ -280,9 +280,10 @@ function updateDailyTotal() {
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const totalDisplay = document.getElementById("daily-total");
+  const bigCountDisplay = document.getElementById("big-session-count");
   
   if (totalDisplay) {
-    const finalDisplayStr = `Today: ${hours}h ${mins}m (${sessionCount} deep ${sessionCount === 1 ? 'session' : 'sessions'})`;
+    const finalDisplayStr = `Today: ${hours}h ${mins}m`;
     
     // Animate if we've initialized before and the session count increased
     if (window._lastSessionCount !== undefined && window._lastSessionCount < sessionCount) {
@@ -381,43 +382,47 @@ function updateDailyTotal() {
       let iterations = 0;
       const maxIterations = 15; // align with the zang sound timing
       
-      totalDisplay.style.transition = 'none';
+      if (totalDisplay) totalDisplay.innerText = finalDisplayStr;
+      if (bigCountDisplay) bigCountDisplay.style.transition = 'none';
       
       const interval = setInterval(() => {
         iterations++;
         // Show random numbers briefly to simulate rolling, but only for the count part
         const rC = oldCount + Math.floor(Math.random() * (difference + 2)); 
-        totalDisplay.innerText = `Today: ${hours}h ${mins}m (${rC} deep sessions)`;
+        if (bigCountDisplay) bigCountDisplay.innerText = rC;
         
         if (iterations >= maxIterations) {
           clearInterval(interval);
-          totalDisplay.innerText = finalDisplayStr;
+          if (bigCountDisplay) bigCountDisplay.innerText = sessionCount;
           
           // Trigger glitter when the final number hits
           spawnGlitter();
           
           // Golden/Green achievement flash effect
-          totalDisplay.style.color = '#FFD700'; // Gold color
-          totalDisplay.style.textShadow = '0 0 15px rgba(255, 215, 0, 1)';
-          totalDisplay.style.transform = 'scale(1.15)';
-          totalDisplay.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // bouncy pop
-          
-          setTimeout(() => {
-            totalDisplay.style.color = '#4caf50'; // Settle on a success green
-            totalDisplay.style.textShadow = '0 0 8px rgba(76, 175, 80, 0.6)';
-            totalDisplay.style.transform = 'scale(1.02)';
+          if (bigCountDisplay) {
+            bigCountDisplay.style.color = '#FFD700'; // Gold color
+            bigCountDisplay.style.textShadow = '0 0 15px rgba(255, 215, 0, 1)';
+            bigCountDisplay.style.transform = 'scale(1.3)';
+            bigCountDisplay.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // bouncy pop
             
             setTimeout(() => {
-               totalDisplay.style.color = '';
-               totalDisplay.style.textShadow = '';
-               totalDisplay.style.transform = '';
-            }, 800);
-          }, 400);
+              bigCountDisplay.style.color = '#4caf50'; // Settle on a success green
+              bigCountDisplay.style.textShadow = '0 0 8px rgba(76, 175, 80, 0.6)';
+              bigCountDisplay.style.transform = 'scale(1.05)';
+              
+              setTimeout(() => {
+                 bigCountDisplay.style.color = '';
+                 bigCountDisplay.style.textShadow = '';
+                 bigCountDisplay.style.transform = '';
+              }, 800);
+            }, 400);
+          }
         }
       }, 40);
 
     } else {
       totalDisplay.innerText = finalDisplayStr;
+      if (bigCountDisplay) bigCountDisplay.innerText = sessionCount;
     }
     
     window._lastSessionCount = sessionCount;
