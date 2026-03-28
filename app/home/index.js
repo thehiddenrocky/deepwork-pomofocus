@@ -18,25 +18,17 @@ window.updateProgressRing = function(currentSeconds, totalSeconds) {
 };
 
 function loadJSON(filename = "") {
-  console.log("Loading config from:", filename);
-  console.log("File exists:", fs.existsSync(filename));
   const content = fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null";
-  console.log("File content:", content);
   return JSON.parse(content);
 }
 data = loadJSON(configPath);
-console.log("Loaded data:", data);
-console.log("Focus time from config:", data.time_data.focus_time);
 focusTime = parseInt(data.time_data.focus_time.split(":")[0]); // orig val = 25
 shortBreakTime = parseInt(data.time_data.short_break.split(":")[0]); // orid val = 5
 longBreakTime = parseInt(data.time_data.long_break.split(":")[0]); // orig val = 15
 
 timer = document.getElementById("timer");
-console.log("Timer element:", timer);
-console.log("Setting timer to:", data.time_data.focus_time);
 if (timer) {
   timer.innerHTML = data.time_data.focus_time;
-  console.log("Timer innerHTML is now:", timer.innerHTML);
 } else {
   console.error("Timer element not found!");
 }
@@ -67,7 +59,6 @@ try {
       end: new Date(parsed.end),
       type: parsed.type
     };
-    console.log("Restored pending log:", pendingLog);
   }
 } catch (e) {
   console.error("Error restoring pending log:", e);
@@ -95,12 +86,10 @@ function prepareLog(shouldFocus = true) {
 }
 
 function commitLog(note = "") {
-  console.log("Committing log with note:", note);
   if (pendingLog) {
     // Only commit if the session is > 1 minute OR has a note
     const durationMs = pendingLog.end.getTime() - pendingLog.start.getTime();
     if (durationMs < 60000 && (!note || note.trim() === "")) {
-      console.log("Discarding tiny un-noted log fragment.");
       pendingLog = null;
       localStorage.removeItem('pendingLog');
       return;
@@ -114,12 +103,10 @@ function commitLog(note = "") {
     const endTime = pendingLog.end.toISOString();
     const safeNote = note ? `"${note.replace(/"/g, '""')}"` : "";
     fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},${safeNote}\n`);
-    console.log("Log appended to:", logFilePath);
     pendingLog = null;
     localStorage.removeItem('pendingLog');
     updateDailyTotal();
   } else {
-    console.log("No pending log to commit");
   }
 }
 
@@ -138,13 +125,10 @@ window.addEventListener('beforeunload', () => {
 function setupNoteInput() {
   const noteInput = document.getElementById("log-note");
   const logSubmit = document.getElementById("log-submit");
-  console.log("Setting up note input, element found:", noteInput !== null);
   
   if (noteInput && logSubmit) {
     const handleLog = () => {
       const note = noteInput.value.trim();
-      console.log("Submitting log, note:", note);
-      console.log("pendingLog exists:", !!pendingLog);
 
       const showAcknowledgment = () => {
         const originalPlaceholder = "Session note (optional)...";
@@ -165,7 +149,6 @@ function setupNoteInput() {
         noteInput.blur();
         showAcknowledgment();
       } else if (currentSessionStartTime) {
-        console.log("Creating log from active session");
         prepareLog(true);
         commitLog(note);
         noteInput.value = "";
@@ -173,7 +156,6 @@ function setupNoteInput() {
         currentSessionStartTime = new Date();
         showAcknowledgment();
       } else {
-        console.log("No session to log - starting manual log");
         const now = new Date();
         pendingLog = {
           start: now,
@@ -230,7 +212,6 @@ function updateDailyTotal() {
   let sessionCount = 0;
 
   if (fs.existsSync(logFilePath)) {
-    console.log("Looking for logs for date:", today);
     const rawData = fs.readFileSync(logFilePath, 'utf8');
     const lines = rawData.split('\n').slice(1); // Skip header
 
@@ -276,7 +257,6 @@ function updateDailyTotal() {
   // after the user presses Enter and the log is committed.
   
   const totalMinutes = Math.round(totalMs / 60000);
-  console.log("Calculated total focus minutes for today:", totalMinutes);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const totalDisplay = document.getElementById("daily-total");
@@ -460,7 +440,6 @@ function check_timer_text() {
   timer_text = timer.innerHTML.split(":");
   starting_min = parseInt(timer_text[0]);
   starting_sec = parseInt(timer_text[1]);
-  // console.log(starting_min + ":" + starting_sec);
 }
 
 workCount = 0;

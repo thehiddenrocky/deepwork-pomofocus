@@ -35,10 +35,22 @@ def analyze_pomofocus_logs():
                 except Exception as e:
                     pass # Skip malformed rows
 
+    # Calculate Weekly Summary (Last 7 days)
+    now = datetime.now()
+    weekly_mins = 0
+    for date_str, durations in sessions_by_date.items():
+        try:
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+            if (now - date_obj).days < 7:
+                weekly_mins += sum(durations)
+        except:
+            continue
+
     print("====================================")
     print(" PomoFocus: Deep Work Performance ")
     print("====================================")
     print(f"Total Lifetime Deep Work: {total_focus_minutes / 60:.1f} hours")
+    print(f"Last 7 Days (Weekly):     {weekly_mins / 60:.1f} hours")
     print("\nRecent Days:")
     
     # Sort dates descending and show top 5

@@ -41,7 +41,6 @@ save_btn = document.getElementById("save-btn");
 save_btn.addEventListener("click", () => {
   updated_data = saveChangedData(data);
   saveJSON(configPath, updated_data);
-  console.log("Updated Data: \n" + loadJSON(configPath));
   save_btn.innerHTML = "Saved!";
   ipcRenderer.send("ReloadMain");
   ipcRenderer.send("closeSetting");

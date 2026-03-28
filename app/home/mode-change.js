@@ -27,10 +27,8 @@ function loadJSON(filename = "") {
 }
 
 data = loadJSON(configPath);
-console.log("mode-change.js loaded config:", data);
 
 function remClassList() {
-  console.log(element_list);
   element_list.forEach((element) => {
     if (element.classList.contains("change-opacity")) {
       element.classList.remove("change-opacity");
