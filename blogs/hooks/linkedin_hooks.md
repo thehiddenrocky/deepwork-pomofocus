@@ -18,3 +18,10 @@ I built a local-first scoreboard that turns every Deep Work session into a high-
 **Hook:** Are you "busy" or are you "productive"? There's a difference. 🚧
 Most of us spend our days in "Shallow Work"—tasks that feel like progress but move the needle zero inches. I added a mandatory "Protocol of Intent" to my focus ritual to stop the auto-pilot trap.
 **CTA:** How a 5-second "Session Note" saved my deepest work sessions. #CalNewport #Mindfulness #WorkFlow
+
+---
+
+### Hook 4: The Uptime Illusion
+**Hook:** Stop measuring "hours at desk." It’s an ego metric. 🖱️🛑
+In infrastructure, uptime is irrelevant without throughput. I built a "Reality Check Engine" into PomoFocus that audits my actual deep focus minutes against the local CSV logs.
+**CTA:** Why my 8-hour workdays were actually only 3 hours of Deep Work (and how I fixed it). #PerformanceEngineering #DataTransparency #DeepWork
