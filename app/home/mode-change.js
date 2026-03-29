@@ -27,10 +27,8 @@ function loadJSON(filename = "") {
 }
 
 data = loadJSON(configPath);
-console.log("mode-change.js loaded config:", data);
 
 function remClassList() {
-  console.log(element_list);
   element_list.forEach((element) => {
     if (element.classList.contains("change-opacity")) {
       element.classList.remove("change-opacity");
@@ -39,24 +37,39 @@ function remClassList() {
 }
 
 focus_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
+  if (typeof PauseTimer === "function") PauseTimer();
   timer.innerHTML = data.time_data.focus_time;
   title.innerHTML = "PomoFocus!";
   remClassList();
   focus_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = false;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 shortbreak_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
+  if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Short Break";
   timer.innerHTML = data.time_data.short_break;
   remClassList();
   shortbreak_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = true;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 longbreak_mode.addEventListener("click", () => {
+  if (typeof endSession === "function") endSession();
+  if (typeof PauseTimer === "function") PauseTimer();
   title.innerHTML = "Long Break";
   timer.innerHTML = data.time_data.long_break;
   remClassList();
   longbreak_mode.classList.add("change-opacity");
+  if (typeof isBreak !== "undefined") isBreak = true;
+  if (typeof updateDailyTotal === "function") updateDailyTotal();
+  if (window.updateProgressRing) window.updateProgressRing(1, 1);
 });
 
 setting_button = document.getElementById("settings-mode");

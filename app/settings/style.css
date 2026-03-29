@@ -108,6 +108,11 @@ h2 {
   padding: 2px 40px 5px 40px;
 }
 
+input:focus, .save-btn:focus {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 2px;
+}
+
 .btn-change-cursor {
   cursor: pointer;
 }

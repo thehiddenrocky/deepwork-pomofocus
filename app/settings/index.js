@@ -41,8 +41,18 @@ save_btn = document.getElementById("save-btn");
 save_btn.addEventListener("click", () => {
   updated_data = saveChangedData(data);
   saveJSON(configPath, updated_data);
-  console.log("Updated Data: \n" + loadJSON(configPath));
   save_btn.innerHTML = "Saved!";
   ipcRenderer.send("ReloadMain");
   ipcRenderer.send("closeSetting");
+});
+
+document.addEventListener("keydown", (e) => {
+  const ctrlOrCmd = e.ctrlKey || e.metaKey;
+  if (e.key === "Escape") {
+    e.preventDefault();
+    ipcRenderer.send("closeSetting");
+  } else if (ctrlOrCmd && e.key.toLowerCase() === "r") {
+    e.preventDefault();
+    ipcRenderer.send("ReloadMain");
+  }
 });

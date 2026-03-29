@@ -9,6 +9,7 @@
 body {
   background-color: #1c1c1c;
   color: #ffffff;
+  overflow: hidden;
 }
 .button {
   margin: none;
@@ -80,12 +81,37 @@ body {
   padding: 2px 40px 5px 40px;
 }
 
+.start:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+#log-note:focus {
+  outline: 2px solid #ffffff !important;
+}
+
+#log-submit:hover {
+  color: white !important;
+  background-color: #fff4 !important;
+}
+
+#log-submit:focus {
+  color: white !important;
+  background-color: #fff4 !important;
+  box-shadow: 0 0 0 2px #4caf50 !important;
+}
+
+#log-submit.registered {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
 /* timer style end */
 
 /* right content stying */
 .right-content {
-  height: 4.5cm;
-  width: 3.1cm;
+  height: 280px;
+  width: 120px;
   background-color: #242424;
   border-radius: 13px;
   /* 
@@ -115,6 +141,31 @@ body {
 .right-content > *:nth-child(even) {
   align-self: flex-end;
 }
+.hidden-indicator {
+  display: none !important;
+}
+
+.ringing {
+  display: block !important;
+  animation: ring 0.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.ringing:focus {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 4px;
+  border-radius: 5px;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
 /* right content stying -end*/
 
 .top-rt-btn {
@@ -132,3 +183,20 @@ body {
 .change-opacity {
   opacity: 50%;
 }
+
+#log-note.registered-input::placeholder {
+  color: #4caf50;
+  font-weight: bold;
+}
+#log-note.registered-input {
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6) !important;
+  border: 1px solid #4caf50 !important;
+  transition: all 0.3s ease;
+}
+
+/* Progress Ring Styling */
+.progress-ring__circle {
+  transition: stroke-dashoffset 1s linear;
+  transform-origin: 50% 50%;
+}
+
