@@ -22,6 +22,7 @@ function loadJSON(filename = "") {
   return JSON.parse(content);
 }
 data = loadJSON(configPath);
+if (data && !data.projects) data.projects = ["P1", "P2", "P3"];
 focusTime = parseInt(data.time_data.focus_time.split(":")[0]); // orig val = 25
 shortBreakTime = parseInt(data.time_data.short_break.split(":")[0]); // orid val = 5
 longBreakTime = parseInt(data.time_data.long_break.split(":")[0]); // orig val = 15
@@ -131,10 +132,28 @@ function commitLog(note = "") {
 }
 
 function setupProjectLabels() {
-  if (data && data.projects) {
+  const container = document.getElementById('project-selection');
+  if (data && data.projects && container) {
+    container.innerHTML = ''; // clear old ones
     data.projects.forEach((name, index) => {
-      const label = document.getElementById(`project${index}-label`);
-      if (label) label.innerText = name;
+      if (!name.trim()) return;
+      const label = document.createElement('label');
+      label.className = 'project-radio';
+      
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'project';
+      input.value = index;
+      if (index === 0) input.checked = true; // default first item
+      
+      const span = document.createElement('span');
+      span.className = 'radio-label';
+      span.id = `project${index}-label`;
+      span.innerText = name.trim();
+      
+      label.appendChild(input);
+      label.appendChild(span);
+      container.appendChild(label);
     });
   }
 }

@@ -13,10 +13,9 @@ function saveChangedData(data) {
   data.time_data.long_break = document.getElementById("longbreak-time").value;
   data.always_on_top = document.getElementById("always-on-top").checked;
 
-  if (!data.projects) data.projects = ["P1", "P2", "P3"];
-  data.projects[0] = document.getElementById("project1-name").value;
-  data.projects[1] = document.getElementById("project2-name").value;
-  data.projects[2] = document.getElementById("project3-name").value;
+  const projectsStr = document.getElementById("project-names").value;
+  data.projects = projectsStr.split(",").map(s => s.trim()).filter(Boolean);
+  if (data.projects.length === 0) data.projects = ["Default"];
 
   return data;
 }
@@ -42,9 +41,7 @@ if (data && data.always_on_top) {
   document.getElementById("always-on-top").checked = data.always_on_top;
 }
 if (data && data.projects) {
-  document.getElementById("project1-name").value = data.projects[0] || "P1";
-  document.getElementById("project2-name").value = data.projects[1] || "P2";
-  document.getElementById("project3-name").value = data.projects[2] || "P3";
+  document.getElementById("project-names").value = data.projects.join(", ");
 }
 
 save_btn = document.getElementById("save-btn");
