@@ -13,6 +13,10 @@ function saveChangedData(data) {
   data.time_data.long_break = document.getElementById("longbreak-time").value;
   data.always_on_top = document.getElementById("always-on-top").checked;
 
+  const projectsStr = document.getElementById("project-names").value;
+  data.projects = projectsStr.split(",").map(s => s.trim()).filter(Boolean);
+  if (data.projects.length === 0) data.projects = ["Default"];
+
   return data;
 }
 
@@ -35,6 +39,9 @@ if (data && data.time_data && data.time_data.focus_time) {
 }
 if (data && data.always_on_top) {
   document.getElementById("always-on-top").checked = data.always_on_top;
+}
+if (data && data.projects) {
+  document.getElementById("project-names").value = data.projects.join(", ");
 }
 
 save_btn = document.getElementById("save-btn");
