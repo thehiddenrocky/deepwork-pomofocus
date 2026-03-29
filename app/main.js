@@ -35,13 +35,15 @@ function createWindow() {
     },
   });
 
-  mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
-  mainWindow.setVisibleOnAllWorkspaces(true);
-
-  // Force always on top if it gets blurred
-  mainWindow.on('blur', () => {
+  if (data.always_on_top) {
     mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
-  });
+    mainWindow.setVisibleOnAllWorkspaces(true);
+
+    // Force always on top if it gets blurred
+    mainWindow.on('blur', () => {
+      mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+    });
+  }
 
   mainWindow.loadFile("home/index.html");
   mainWindow.on("closed", () => {
