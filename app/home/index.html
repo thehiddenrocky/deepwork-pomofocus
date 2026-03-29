@@ -35,7 +35,7 @@
           <div id="log-submit" tabindex="0" title="Log session (Enter)" style="cursor: pointer; font-size: 20px; color: #ffffffb3; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; outline: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #fff3; border-radius: 5px;">✓</div>
         </div>
       </div>
-      <div class="right-panel" style="display: flex; align-items: center; justify-content: center; width: 120px; height: 280px; background-color: transparent;">
+      <div class="right-panel" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; height: 280px; background-color: transparent;">
         <div style="display: none;">
           <span title="Focus mode"><img src="images/time.png" id="focus-mode" class="btn-change-cursor change-opacity" alt="" /></span>
           <span title="Short break"><img src="images/short-break.png" id="shortbreak-mode"class="btn-change-cursor" alt="" /></span>
@@ -53,6 +53,11 @@
             <span id="big-session-count" style="font-size: 40px; font-weight: 800; color: #ffffff; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">0</span>
             <span style="font-size: 14px; font-weight: 600; color: #ffffff88; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px;">/ <span id="daily-goal-text">50</span></span>
           </div>
+        </div>
+
+        <!-- Project Selection -->
+        <div id="project-selection" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; align-self: flex-start; margin-left: 10px;">
+          <!-- Dynamically populated by setupProjectLabels() -->
         </div>
       </div>
     </div>

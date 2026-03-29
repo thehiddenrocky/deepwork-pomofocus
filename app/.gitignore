@@ -4,3 +4,4 @@ dist
 
 node_modules
 nodemon.json
+config.json

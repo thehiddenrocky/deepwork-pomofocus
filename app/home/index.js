@@ -22,6 +22,7 @@ function loadJSON(filename = "") {
   return JSON.parse(content);
 }
 data = loadJSON(configPath);
+if (data && !data.projects) data.projects = ["P1", "P2", "P3"];
 focusTime = parseInt(data.time_data.focus_time.split(":")[0]); // orig val = 25
 shortBreakTime = parseInt(data.time_data.short_break.split(":")[0]); // orid val = 5
 longBreakTime = parseInt(data.time_data.long_break.split(":")[0]); // orig val = 15
@@ -85,6 +86,15 @@ function prepareLog(shouldFocus = true) {
   }
 }
 
+function getSelectedProject() {
+  const selectedRadio = document.querySelector('input[name="project"]:checked');
+  if (selectedRadio) {
+    const index = parseInt(selectedRadio.value);
+    return data.projects && data.projects[index] ? data.projects[index] : `P${index + 1}`;
+  }
+  return "Default";
+}
+
 function commitLog(note = "") {
   if (pendingLog) {
     // Only commit if the session is > 1 minute OR has a note
@@ -96,17 +106,55 @@ function commitLog(note = "") {
     }
 
     if (!fs.existsSync(logFilePath)) {
-      fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
+      fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Project,Note\n");
+    } else {
+      // Check if header needs update (legacy files)
+      const firstLine = fs.readFileSync(logFilePath, 'utf8').split('\n')[0];
+      if (!firstLine.includes("Project")) {
+        const content = fs.readFileSync(logFilePath, 'utf8');
+        const lines = content.split('\n');
+        lines[0] = "Start Time,End Time,Session Type,Project,Note";
+        fs.writeFileSync(logFilePath, lines.join('\n'));
+      }
     }
+    
     // Use ISO string for consistent parsing
     const startTime = pendingLog.start.toISOString();
     const endTime = pendingLog.end.toISOString();
+    const project = getSelectedProject();
     const safeNote = note ? `"${note.replace(/"/g, '""')}"` : "";
-    fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},${safeNote}\n`);
+    fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},"${project}",${safeNote}\n`);
     pendingLog = null;
     localStorage.removeItem('pendingLog');
     updateDailyTotal();
   } else {
+  }
+}
+
+function setupProjectLabels() {
+  const container = document.getElementById('project-selection');
+  if (data && data.projects && container) {
+    container.innerHTML = ''; // clear old ones
+    data.projects.forEach((name, index) => {
+      if (!name.trim()) return;
+      const label = document.createElement('label');
+      label.className = 'project-radio';
+      
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'project';
+      input.value = index;
+      if (index === 0) input.checked = true; // default first item
+      
+      const span = document.createElement('span');
+      span.className = 'radio-label';
+      span.id = `project${index}-label`;
+      span.innerText = name.trim();
+      
+      label.appendChild(input);
+      label.appendChild(span);
+      container.appendChild(label);
+    });
   }
 }
 
@@ -191,13 +239,17 @@ function setupNoteInput() {
 }
 
 // Setup when DOM is ready
-document.addEventListener('DOMContentLoaded', setupNoteInput);
+document.addEventListener('DOMContentLoaded', () => {
+  setupNoteInput();
+  setupProjectLabels();
+});
 
 // Also setup immediately if DOM is already loaded
 if (document.readyState === "loading") {
   // Will be handled by DOMContentLoaded
 } else {
   setupNoteInput();
+  setupProjectLabels();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
 }
 
@@ -241,7 +293,10 @@ function updateDailyTotal() {
             totalMs += durationMs;
             
             // Only count as a "deep session" if it's at least 1 minute long or has a note
-            const noteStr = parts[3] ? parts[3].replace(/"/g, '').trim() : "";
+            // Note is now at index 4 if Project is present, or index 3 if legacy
+            const hasProject = line.includes("Project") || parts.length > 4;
+            const noteIndex = hasProject ? 4 : 3;
+            const noteStr = parts[noteIndex] ? parts[noteIndex].replace(/"/g, '').trim() : "";
             if (durationMs >= 60000 || noteStr !== "") {
               sessionCount++;
             }
@@ -513,6 +568,9 @@ document.addEventListener("keydown", (e) => {
   }
 
   if (inNote) return;
+
+  const isRadio = document.activeElement.tagName === "INPUT" && document.activeElement.type === "radio";
+  if (isRadio && (e.key === " " || e.key.startsWith("Arrow"))) return;
 
   if (e.key === " ") {
     e.preventDefault(); // Prevent default scrolling for spacebar
