@@ -550,6 +550,9 @@ document.addEventListener("keydown", (e) => {
 
   if (inNote) return;
 
+  const isRadio = document.activeElement.tagName === "INPUT" && document.activeElement.type === "radio";
+  if (isRadio && (e.key === " " || e.key.startsWith("Arrow"))) return;
+
   if (e.key === " ") {
     e.preventDefault(); // Prevent default scrolling for spacebar
     toggleTimer();
