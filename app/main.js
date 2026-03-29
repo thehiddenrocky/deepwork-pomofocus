@@ -15,13 +15,20 @@ process.env.NODE_ENV = "production";
 // Get Data from JSON file
 const fs = require("fs");
 const path = require("path");
+const configPath = path.join(__dirname, "config.json");
+
 function loadJSON(filename = "") {
-  return JSON.parse(
-    fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null"
-  );
+  try {
+    return fs.existsSync(filename)
+      ? JSON.parse(fs.readFileSync(filename).toString())
+      : {};
+  } catch (error) {
+    console.error("Error loading JSON:", error);
+    return {};
+  }
 }
 
-data = loadJSON("config.json");
+let data = loadJSON(configPath);
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -30,6 +37,7 @@ function createWindow() {
     frame: false,
     resizable: false,
     icon: path.join(__dirname, "home/images/icons/icon.png"),
+    alwaysOnTop: !!(data && data.always_on_top),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -37,14 +45,16 @@ function createWindow() {
     },
   });
 
-  if (data.always_on_top) {
-    mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
-    mainWindow.setVisibleOnAllWorkspaces(true);
-
-    // Force always on top if it gets blurred
-    mainWindow.on('blur', () => {
+  if (data && data.always_on_top) {
+    if (process.platform === "darwin") {
+      // Use 'screen-saver' to be above almost everything, but with relativeLevel 1
+      // to ensure it stays above other windows in the same level.
       mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
-    });
+      // Ensure it shows up on all workspaces and over full-screen apps
+      mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    } else {
+      mainWindow.setAlwaysOnTop(true);
+    }
   }
 
   mainWindow.loadFile("home/index.html");
