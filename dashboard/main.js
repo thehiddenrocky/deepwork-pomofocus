@@ -21,7 +21,6 @@ function parseCSV(text) {
     const data = [];
     
     for (let i = 1; i < lines.length; i++) {
-        // Simple CSV split (won't handle commas inside quotes well, but enough for our basic logs)
         const row = lines[i].split(',');
         const obj = {};
         headers.forEach((h, index) => {
@@ -36,9 +35,20 @@ function analyzeLogs(csvText) {
     const logs = parseCSV(csvText);
     
     let totalFocusMinutes = 0;
-    const sessionsByDate = {};
+    let weeklyMins = 0;
     const categories = {};
     
+    // For GitHub Heatmap (Last 30 Days)
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    let totalSessions30Days = 0;
+    
+    // gridData[dayOfWeek][hourOfDay] = total minutes
+    // sessionCount[dayOfWeek][hourOfDay] = total sessions
+    const gridData = Array(7).fill().map(() => Array(24).fill(0));
+    const sessionCount = Array(7).fill().map(() => Array(24).fill(0));
+
     logs.forEach(row => {
         if (row['Session Type'] === 'Focus') {
             try {
@@ -49,29 +59,28 @@ function analyzeLogs(csvText) {
                 if (durationMins > 0) {
                     totalFocusMinutes += durationMins;
                     
-                    const dateStr = start.toISOString().split('T')[0];
-                    if (!sessionsByDate[dateStr]) sessionsByDate[dateStr] = 0;
-                    sessionsByDate[dateStr] += durationMins;
+                    const daysDiff = (now - start) / (1000 * 60 * 60 * 24);
+                    if (daysDiff < 7) {
+                        weeklyMins += durationMins;
+                    }
                     
                     const note = row['Note'] || 'Uncategorized';
                     if (!categories[note]) categories[note] = 0;
                     categories[note] += durationMins;
+                    
+                    // Populate Heatmap Data
+                    if (start >= thirtyDaysAgo) {
+                        const day = start.getDay(); // 0 = Sunday
+                        const hour = start.getHours(); // 0-23
+                        
+                        gridData[day][hour] += durationMins;
+                        sessionCount[day][hour] += 1;
+                        totalSessions30Days++;
+                    }
                 }
             } catch (e) {
                 // skip bad rows
             }
-        }
-    });
-    
-    // Calculate Weekly Summary
-    const now = new Date();
-    let weeklyMins = 0;
-    
-    Object.keys(sessionsByDate).forEach(dateStr => {
-        const d = new Date(dateStr);
-        const daysDiff = (now - d) / (1000 * 60 * 60 * 24);
-        if (daysDiff < 7) {
-            weeklyMins += sessionsByDate[dateStr];
         }
     });
     
@@ -85,40 +94,74 @@ function analyzeLogs(csvText) {
         }
     });
     
-    // Update DOM Stats
+    // Update Overview Stats
     document.getElementById('total-hours').innerText = (totalFocusMinutes / 60).toFixed(1) + ' hrs';
     document.getElementById('weekly-hours').innerText = (weeklyMins / 60).toFixed(1) + ' hrs';
     document.getElementById('top-category').innerText = topCat;
     
-    // Render Heatmap (Last 30 Days)
-    renderHeatmap(sessionsByDate);
+    document.getElementById('contribution-heading').innerText = `${totalSessions30Days} deep sessions in the last 30 days`;
+    
+    renderGitHubHeatmap(gridData, sessionCount);
 }
 
-function renderHeatmap(sessionsByDate) {
-    const heatmapEl = document.getElementById('heatmap');
-    heatmapEl.innerHTML = '';
+function renderGitHubHeatmap(gridData, sessionCount) {
+    const container = document.getElementById('gh-grid');
+    container.innerHTML = '';
     
-    const today = new Date();
-    // Start 30 days ago
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+    // 1. Render Top Header Row (Hours)
+    const emptyCorner = document.createElement('div');
+    container.appendChild(emptyCorner); // Top-left empty space
+    
+    for (let h = 0; h < 24; h++) {
+        const hourLabel = document.createElement('div');
+        hourLabel.className = 'gh-label-x';
         
-        const mins = sessionsByDate[dateStr] || 0;
-        const hours = mins / 60;
+        // Show labels every 3 hours (12am, 3am, 6am, etc) to mimic Month spacing
+        if (h % 3 === 0) {
+            const displayHour = h === 0 ? '12am' : (h < 12 ? `${h}am` : (h === 12 ? '12pm' : `${h-12}pm`));
+            hourLabel.innerText = displayHour;
+        }
+        container.appendChild(hourLabel);
+    }
+    
+    // 2. Render Grid Rows (Days of the week)
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    for (let d = 0; d < 7; d++) {
+        // Y-axis Label
+        const dayLabel = document.createElement('div');
+        dayLabel.className = 'gh-label-y';
+        if (d === 1 || d === 3 || d === 5) { // Only show Mon, Wed, Fri
+            dayLabel.innerText = dayLabels[d];
+        }
+        container.appendChild(dayLabel);
         
-        const box = document.createElement('div');
-        box.classList.add('day-box');
-        
-        // Heatmap colors based on deep work hours
-        if (hours > 0 && hours <= 1) box.classList.add('heat-1');
-        else if (hours > 1 && hours <= 3) box.classList.add('heat-2');
-        else if (hours > 3 && hours <= 5) box.classList.add('heat-3');
-        else if (hours > 5) box.classList.add('heat-4');
-        
-        box.setAttribute('data-info', `${dateStr}: ${hours.toFixed(1)} hrs`);
-        
-        heatmapEl.appendChild(box);
+        // Data Boxes for 24 hours
+        for (let h = 0; h < 24; h++) {
+            const box = document.createElement('div');
+            box.className = 'gh-box';
+            
+            const mins = gridData[d][h];
+            const count = sessionCount[d][h];
+            
+            // Apply GitHub colors based on intensity (minutes of deep work in that hour block)
+            if (mins > 0 && mins <= 25) {
+                box.classList.add('gh-lvl-1');
+            } else if (mins > 25 && mins <= 50) {
+                box.classList.add('gh-lvl-2');
+            } else if (mins > 50 && mins <= 90) {
+                box.classList.add('gh-lvl-3');
+            } else if (mins > 90) {
+                box.classList.add('gh-lvl-4'); // Highly productive slot over the month!
+            }
+            
+            // Tooltip on Hover
+            if (count > 0) {
+                const timeStr = h === 0 ? '12 AM' : (h < 12 ? `${h} AM` : (h === 12 ? '12 PM' : `${h-12} PM`));
+                box.setAttribute('data-info', `${count} session${count > 1 ? 's' : ''} (${Math.round(mins)} mins) on ${dayLabels[d]}s at ${timeStr}`);
+            }
+            
+            container.appendChild(box);
+        }
     }
 }
