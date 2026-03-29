@@ -1,0 +1,112 @@
+:root {
+    --bg-color: #1a1a1a;
+    --card-bg: #2a2a2a;
+    --text-color: #e0e0e0;
+    --accent-color: #fca311;
+    --heat-0: #2d2d2d;
+    --heat-1: #4a3e21;
+    --heat-2: #8a6a24;
+    --heat-3: #c89526;
+    --heat-4: #fca311;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+}
+
+header h1 {
+    margin: 0;
+    color: var(--accent-color);
+}
+
+header p {
+    color: #888;
+    margin-top: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.heatmap-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.heatmap {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.day-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background-color: var(--heat-0);
+    position: relative;
+    cursor: default;
+}
+
+.day-box:hover::after {
+    content: attr(data-info);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 5px;
+}
+
+.heat-1 { background-color: var(--heat-1); }
+.heat-2 { background-color: var(--heat-2); }
+.heat-3 { background-color: var(--heat-3); }
+.heat-4 { background-color: var(--heat-4); }

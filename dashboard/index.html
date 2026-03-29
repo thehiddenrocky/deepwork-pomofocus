@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PomoFocus Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PomoFocus Dashboard</h1>
+            <p>Deep Work Performance Scoreboard</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Lifetime Focus</h3>
+                <p id="total-hours">-- hrs</p>
+            </div>
+            <div class="stat-card">
+                <h3>Last 7 Days</h3>
+                <p id="weekly-hours">-- hrs</p>
+            </div>
+            <div class="stat-card">
+                <h3>Top Focus Category</h3>
+                <p id="top-category">--</p>
+            </div>
+        </section>
+
+        <section class="heatmap-section">
+            <h2>Focus Consistency (Last 30 Days)</h2>
+            <div id="heatmap" class="heatmap"></div>
+        </section>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
