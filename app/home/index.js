@@ -85,6 +85,15 @@ function prepareLog(shouldFocus = true) {
   }
 }
 
+function getSelectedProject() {
+  const selectedRadio = document.querySelector('input[name="project"]:checked');
+  if (selectedRadio) {
+    const index = parseInt(selectedRadio.value);
+    return data.projects && data.projects[index] ? data.projects[index] : `P${index + 1}`;
+  }
+  return "Default";
+}
+
 function commitLog(note = "") {
   if (pendingLog) {
     // Only commit if the session is > 1 minute OR has a note
@@ -96,17 +105,37 @@ function commitLog(note = "") {
     }
 
     if (!fs.existsSync(logFilePath)) {
-      fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Note\n");
+      fs.writeFileSync(logFilePath, "Start Time,End Time,Session Type,Project,Note\n");
+    } else {
+      // Check if header needs update (legacy files)
+      const firstLine = fs.readFileSync(logFilePath, 'utf8').split('\n')[0];
+      if (!firstLine.includes("Project")) {
+        const content = fs.readFileSync(logFilePath, 'utf8');
+        const lines = content.split('\n');
+        lines[0] = "Start Time,End Time,Session Type,Project,Note";
+        fs.writeFileSync(logFilePath, lines.join('\n'));
+      }
     }
+    
     // Use ISO string for consistent parsing
     const startTime = pendingLog.start.toISOString();
     const endTime = pendingLog.end.toISOString();
+    const project = getSelectedProject();
     const safeNote = note ? `"${note.replace(/"/g, '""')}"` : "";
-    fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},${safeNote}\n`);
+    fs.appendFileSync(logFilePath, `${startTime},${endTime},${pendingLog.type},"${project}",${safeNote}\n`);
     pendingLog = null;
     localStorage.removeItem('pendingLog');
     updateDailyTotal();
   } else {
+  }
+}
+
+function setupProjectLabels() {
+  if (data && data.projects) {
+    data.projects.forEach((name, index) => {
+      const label = document.getElementById(`project${index}-label`);
+      if (label) label.innerText = name;
+    });
   }
 }
 
@@ -191,13 +220,17 @@ function setupNoteInput() {
 }
 
 // Setup when DOM is ready
-document.addEventListener('DOMContentLoaded', setupNoteInput);
+document.addEventListener('DOMContentLoaded', () => {
+  setupNoteInput();
+  setupProjectLabels();
+});
 
 // Also setup immediately if DOM is already loaded
 if (document.readyState === "loading") {
   // Will be handled by DOMContentLoaded
 } else {
   setupNoteInput();
+  setupProjectLabels();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
 }
 
@@ -241,7 +274,10 @@ function updateDailyTotal() {
             totalMs += durationMs;
             
             // Only count as a "deep session" if it's at least 1 minute long or has a note
-            const noteStr = parts[3] ? parts[3].replace(/"/g, '').trim() : "";
+            // Note is now at index 4 if Project is present, or index 3 if legacy
+            const hasProject = line.includes("Project") || parts.length > 4;
+            const noteIndex = hasProject ? 4 : 3;
+            const noteStr = parts[noteIndex] ? parts[noteIndex].replace(/"/g, '').trim() : "";
             if (durationMs >= 60000 || noteStr !== "") {
               sessionCount++;
             }

@@ -200,3 +200,62 @@ body {
   transform-origin: 50% 50%;
 }
 
+/* Project Selection Styling */
+.project-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.project-radio:hover {
+  background-color: #ffffff11;
+}
+
+.project-radio input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff66;
+  border-radius: 3px;
+  background-color: transparent;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.project-radio input[type="radio"]:checked {
+  border-color: #256faf;
+  background-color: #256faf;
+}
+
+.project-radio input[type="radio"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.project-radio input[type="radio"]:focus {
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #ffffffb3;
+  font-weight: 500;
+}
+
+.project-radio input[type="radio"]:checked + .radio-label {
+  color: #ffffff;
+}
+

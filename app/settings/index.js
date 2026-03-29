@@ -13,6 +13,11 @@ function saveChangedData(data) {
   data.time_data.long_break = document.getElementById("longbreak-time").value;
   data.always_on_top = document.getElementById("always-on-top").checked;
 
+  if (!data.projects) data.projects = ["P1", "P2", "P3"];
+  data.projects[0] = document.getElementById("project1-name").value;
+  data.projects[1] = document.getElementById("project2-name").value;
+  data.projects[2] = document.getElementById("project3-name").value;
+
   return data;
 }
 
@@ -35,6 +40,11 @@ if (data && data.time_data && data.time_data.focus_time) {
 }
 if (data && data.always_on_top) {
   document.getElementById("always-on-top").checked = data.always_on_top;
+}
+if (data && data.projects) {
+  document.getElementById("project1-name").value = data.projects[0] || "P1";
+  document.getElementById("project2-name").value = data.projects[1] || "P2";
+  document.getElementById("project3-name").value = data.projects[2] || "P3";
 }
 
 save_btn = document.getElementById("save-btn");
