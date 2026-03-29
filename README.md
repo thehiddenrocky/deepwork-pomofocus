@@ -2,7 +2,7 @@
 
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
 
-A standalone, local-first Pomodoro timer engineered for maximum focus and zero latency. Built with Electron.js, Vanilla CSS, and pure DOM manipulation.
+A standalone, local-first Pomodoro timer and Deep Work analytics dashboard engineered for maximum focus and zero latency. Built with Electron.js, Vanilla JS, and pure DOM manipulation.
 
 Read the [PHILOSOPHY.md](PHILOSOPHY.md) to understand the "Deep Work" concepts driving this project.
 
@@ -12,21 +12,23 @@ Because most timers are distractions. They require mouse clicks, store your data
 ### Core Features
 - ⌨️ **Hands-Free Control:** 100% keyboard accessible. Press `Space` to toggle, `k` to acknowledge alarms, and `/` to log notes. Never touch your mouse.
 - 📊 **Local Audit Log:** Every session is streamed directly to a local CSV (`~/pomofocus-logs.csv`). No cloud, no subscriptions, full data ownership.
+- 📈 **GitHub-Style Heatmap Dashboard:** A dedicated, lightweight Vanilla JS dashboard that visualizes your Deep Work consistency across the hours of the day.
 - 🎯 **Session Intentionality:** Forces a 5-second "Session Note" prompt after every block to prevent you from slipping into "Shallow Work."
-- 🔊 **Synthesized Rewards:** Uses the Web Audio API (`AudioContext`) and canvas particles to create a "Glitter & Zang" dopamine loop when you complete a deep work session.
+- 🔊 **Synthesized Rewards:** Uses the Web Audio API (`AudioContext`) and canvas particles to create a dopamine loop when you complete a deep work session.
 - ⭕ **Peripheral Progress Ring:** A smooth SVG ring lets you gauge remaining time subconsciously without "reading" numbers.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start: The App
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/thatsyogeshjjr/PomoFocus.git
-   cd PomoFocus/app
+   git clone https://github.com/thehiddenrocky/deepwork-pomofocus.git
+   cd deepwork-pomofocus
    ```
 2. **Install dependencies:**
    ```bash
+   cd app
    npm install
    ```
 3. **Start the Focus Engine:**
@@ -36,14 +38,24 @@ Because most timers are distractions. They require mouse clicks, store your data
 
 *(For development, use `npm run watch` to enable hot-reloading).*
 
-## 📈 Analyzing Your Lead Measures
-Included in the `scripts/` directory is a Python script designed to parse your `pomofocus-logs.csv` and output a "Performance Report" of your Deep Work hours. 
+## 📈 Analyzing Your Lead Measures (Dashboard)
 
+PomoFocus includes a beautiful, local-only Dashboard that mimics your GitHub Contribution Graph, mapping your Deep Work hours exactly when they happen during the week.
+
+1. **Start the Dashboard Server:**
+   From the root of the project, run:
+   ```bash
+   node dashboard/server.js
+   ```
+2. **View your Stats:**
+   Open your browser and navigate to `http://localhost:3030/`
+
+*Alternatively, if you prefer the terminal, you can run the Python CLI analyzer:*
 ```bash
 python scripts/analyze_logs.py
 ```
 
-## Shortcuts Cheat Sheet
+## ⌨️ Shortcuts Cheat Sheet
 - `Space`: Start/Pause Timer
 - `k`: Acknowledge Alarm & Stop Sound
 - `/` or `Cmd/Ctrl + N`: Focus Session Note

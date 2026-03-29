@@ -48,6 +48,7 @@ function analyzeLogs(csvText) {
     // sessionCount[dayOfWeek][hourOfDay] = total sessions
     const gridData = Array(7).fill().map(() => Array(24).fill(0));
     const sessionCount = Array(7).fill().map(() => Array(24).fill(0));
+    const datesInBlock = Array(7).fill().map(() => Array(24).fill().map(() => new Set()));
 
     logs.forEach(row => {
         if (row['Session Type'] === 'Focus') {
@@ -75,6 +76,7 @@ function analyzeLogs(csvText) {
                         
                         gridData[day][hour] += durationMins;
                         sessionCount[day][hour] += 1;
+                        datesInBlock[day][hour].add(start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
                         totalSessions30Days++;
                     }
                 }
@@ -101,10 +103,10 @@ function analyzeLogs(csvText) {
     
     document.getElementById('contribution-heading').innerText = `${totalSessions30Days} deep sessions in the last 30 days`;
     
-    renderGitHubHeatmap(gridData, sessionCount);
+    renderGitHubHeatmap(gridData, sessionCount, datesInBlock);
 }
 
-function renderGitHubHeatmap(gridData, sessionCount) {
+function renderGitHubHeatmap(gridData, sessionCount, datesInBlock) {
     const container = document.getElementById('gh-grid');
     container.innerHTML = '';
     
@@ -143,6 +145,7 @@ function renderGitHubHeatmap(gridData, sessionCount) {
             
             const mins = gridData[d][h];
             const count = sessionCount[d][h];
+            const dates = Array.from(datesInBlock[d][h]);
             
             // Apply GitHub colors based on intensity (minutes of deep work in that hour block)
             if (mins > 0 && mins <= 25) {
@@ -158,7 +161,8 @@ function renderGitHubHeatmap(gridData, sessionCount) {
             // Tooltip on Hover
             if (count > 0) {
                 const timeStr = h === 0 ? '12 AM' : (h < 12 ? `${h} AM` : (h === 12 ? '12 PM' : `${h-12} PM`));
-                box.setAttribute('data-info', `${count} session${count > 1 ? 's' : ''} (${Math.round(mins)} mins) on ${dayLabels[d]}s at ${timeStr}`);
+                const dateSummary = dates.length > 2 ? `${dates[0]}, ${dates[1]} (+${dates.length-2} more)` : dates.join(', ');
+                box.setAttribute('data-info', `${count} session${count > 1 ? 's' : ''} on ${dateSummary} at ${timeStr}`);
             }
             
             container.appendChild(box);
