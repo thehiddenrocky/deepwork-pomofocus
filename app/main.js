@@ -14,6 +14,7 @@ process.env.NODE_ENV = "production";
 
 // Get Data from JSON file
 const fs = require("fs");
+const path = require("path");
 function loadJSON(filename = "") {
   return JSON.parse(
     fs.existsSync(filename) ? fs.readFileSync(filename).toString() : "null"
@@ -28,6 +29,7 @@ function createWindow() {
     height: 380,
     frame: false,
     resizable: false,
+    icon: path.join(__dirname, "home/images/icons/icon.png"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -125,7 +127,12 @@ ipcMain.on("ShowNotification_longbreak", () => {
   }).show();
 });
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+  if (process.platform === "darwin") {
+    app.dock.setIcon(path.join(__dirname, "home/images/icons/icon.png"));
+  }
+  createWindow();
+});
 
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
