@@ -35,9 +35,7 @@ function createWindow() {
     },
   });
 
-  if (data.always_on_top) {
-    mainWindow.setAlwaysOnTop(true, "screen");
-  }
+  mainWindow.setAlwaysOnTop(true, "screen");
 
   mainWindow.loadFile("home/index.html");
   mainWindow.on("closed", () => {
