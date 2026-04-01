@@ -102,6 +102,20 @@ ipcMain.on("openSettings", () => {
   SettingWin.loadFile("settings/index.html");
 });
 
+ipcMain.on("openChat", () => {
+  let chatWin = new BrowserWindow({
+    width: 400,
+    height: 500,
+    frame: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: true,
+    },
+  });
+  chatWin.loadFile("chat/index.html");
+});
+
 ipcMain.on("closeSetting", () => {
   if (SettingWin) SettingWin.close();
 });
