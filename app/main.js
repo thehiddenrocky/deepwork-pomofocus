@@ -36,6 +36,7 @@ function createWindow() {
     height: 380,
     frame: false,
     resizable: false,
+    skipTaskbar: false,
     icon: path.join(__dirname, "home/images/icons/icon.png"),
     alwaysOnTop: !!(data && data.always_on_top),
     webPreferences: {
@@ -47,9 +48,9 @@ function createWindow() {
 
   if (data && data.always_on_top) {
     if (process.platform === "darwin") {
-      // Use 'screen-saver' to be above almost everything, but with relativeLevel 1
-      // to ensure it stays above other windows in the same level.
-      mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+      // Use 'floating' to be above normal windows.
+      // visibleOnFullScreen ensures it stays above full-screen apps without breaking Cmd+Tab.
+      mainWindow.setAlwaysOnTop(true, "floating", 1);
       // Ensure it shows up on all workspaces and over full-screen apps
       mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     } else {
@@ -58,6 +59,9 @@ function createWindow() {
   }
 
   mainWindow.loadFile("home/index.html");
+  if (process.platform === "darwin") {
+    app.dock.show();
+  }
   mainWindow.on("closed", () => {
     mainWindow = null;
     app.quit();
@@ -139,6 +143,9 @@ ipcMain.on("ShowNotification_longbreak", () => {
 
 app.on("ready", () => {
   if (process.platform === "darwin") {
+    if (app.setActivationPolicy) {
+      app.setActivationPolicy("regular");
+    }
     app.dock.setIcon(path.join(__dirname, "home/images/icons/icon.png"));
   }
   createWindow();
