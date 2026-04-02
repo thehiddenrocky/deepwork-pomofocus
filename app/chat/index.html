@@ -2,14 +2,23 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PomoFocus Chat</title>
+    <title>PomoFocus Assistant</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="chat-container">
+        <header>
+            <div class="bot-avatar">DW</div>
+            <h1>Deep Work Assistant</h1>
+        </header>
         <div id="messages"></div>
         <div id="input-area">
-            <input type="text" id="chat-input" placeholder="Ask me anything..." autofocus>
+            <div class="input-wrapper">
+                <input type="text" id="chat-input" placeholder="Type a command (e.g., /stats) or ask a question..." autofocus>
+            </div>
             <button id="send-btn">Send</button>
         </div>
     </div>
