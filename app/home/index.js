@@ -645,25 +645,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  const chatBtn = document.getElementById("chat-btn");
-  if (chatBtn) {
-    chatBtn.addEventListener("click", () => {
-      ipcRenderer.send("openChat");
-    });
-  }
 });
 
 document.addEventListener("keydown", (e) => {
   const inNote = document.activeElement.id === "log-note";
   const ctrlOrCmd = e.ctrlKey || e.metaKey;
 
-  // C key shortcut (if not typing in note) or Cmd/Ctrl + Shift + C
-  if ((e.key.toLowerCase() === "c" && !inNote && !ctrlOrCmd) || (ctrlOrCmd && e.shiftKey && e.key.toLowerCase() === "c")) {
-    e.preventDefault();
-    ipcRenderer.send("openChat");
-    return;
-  }
+  // We could add more shortcuts here
 }, true);
 
 function startTimer() {

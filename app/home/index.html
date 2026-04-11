@@ -5,7 +5,8 @@
   </head>
   <body>
     <div class="titlebar">
-      <div class="name" id="title" >PomoFocus!</div>
+      <div class="name" id="title">PomoFocus!</div>
+      open §
       <div class="action-btn">
         <div class="min btn-change-cursor" id="min">
           <img src="images/min.png" alt="" />
@@ -20,48 +21,262 @@
         <!-- for debugging start -->
         <div id="debug-text" style="visibility: collapse">focus time</div>
         <!--for debugging end -->
-        <div id="daily-total" style="color: #ffffffb3; font-size: 0.9em; margin-bottom: 5px; text-align: center;">Today: 0h 0m</div>
-        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 180px; height: 180px; margin: 5px 0;">
-          <svg class="progress-ring" width="180" height="180" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
-            <circle class="progress-ring__background" stroke="#ffffff33" stroke-width="6" fill="transparent" r="84" cx="90" cy="90"/>
-            <circle id="progress-circle" class="progress-ring__circle" stroke="#256faf" stroke-width="6" fill="transparent" r="84" cx="90" cy="90" stroke-linecap="round"/>
-          </svg>
-          <p class="timer" id="timer" style="margin: 0; z-index: 1; font-size: 55px;">25:00</p>
-          <div id="alarm-indicator" class="hidden-indicator" tabindex="0" title="Click or press 'K' to mute" style="position: absolute; right: -25px; top: 10px; font-size: 24px; cursor: pointer; outline: none; z-index: 2;">🔔</div>
+        <div
+          id="daily-total"
+          style="
+            color: #ffffffb3;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-align: center;
+          "
+        >
+          Today: 0h 0m
         </div>
-        <button id="start-btn" class="button start btn-change-cursor" >Start</button>
-        <div style="margin-top: 15px; display: flex; align-items: center; gap: 8px;">
-          <input type="text" id="log-note" placeholder="Session note (optional)..." style="flex-grow: 1; padding: 8px; border-radius: 5px; border: none; background: #fff3; color: white; outline: none;" />
-          <div id="log-submit" tabindex="0" title="Log session (Enter)" style="cursor: pointer; font-size: 20px; color: #ffffffb3; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; outline: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #fff3; border-radius: 5px;">✓</div>
+        <div
+          style="
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 180px;
+            height: 180px;
+            margin: 5px 0;
+          "
+        >
+          <svg
+            class="progress-ring"
+            width="180"
+            height="180"
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              transform: rotate(-90deg);
+            "
+          >
+            <circle
+              class="progress-ring__background"
+              stroke="#ffffff33"
+              stroke-width="6"
+              fill="transparent"
+              r="84"
+              cx="90"
+              cy="90"
+            />
+            <circle
+              id="progress-circle"
+              class="progress-ring__circle"
+              stroke="#256faf"
+              stroke-width="6"
+              fill="transparent"
+              r="84"
+              cx="90"
+              cy="90"
+              stroke-linecap="round"
+            />
+          </svg>
+          <p
+            class="timer"
+            id="timer"
+            style="margin: 0; z-index: 1; font-size: 55px"
+          >
+            25:00
+          </p>
+          <div
+            id="alarm-indicator"
+            class="hidden-indicator"
+            tabindex="0"
+            title="Click or press 'K' to mute"
+            style="
+              position: absolute;
+              right: -25px;
+              top: 10px;
+              font-size: 24px;
+              cursor: pointer;
+              outline: none;
+              z-index: 2;
+            "
+          >
+            🔔
+          </div>
+        </div>
+        <button id="start-btn" class="button start btn-change-cursor">
+          Start
+        </button>
+        <div
+          style="margin-top: 15px; display: flex; align-items: center; gap: 8px"
+        >
+          <input
+            type="text"
+            id="log-note"
+            placeholder="Session note (optional)..."
+            style="
+              flex-grow: 1;
+              padding: 8px;
+              border-radius: 5px;
+              border: none;
+              background: #fff3;
+              color: white;
+              outline: none;
+            "
+          />
+          <div
+            id="log-submit"
+            tabindex="0"
+            title="Log session (Enter)"
+            style="
+              cursor: pointer;
+              font-size: 20px;
+              color: #ffffffb3;
+              transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+              outline: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 34px;
+              height: 34px;
+              background: #fff3;
+              border-radius: 5px;
+            "
+          >
+            ✓
+          </div>
         </div>
       </div>
-      <div class="right-panel" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; height: 280px; background-color: transparent;">
-        <div style="display: none;">
-          <span title="Focus mode"><img src="images/time.png" id="focus-mode" class="btn-change-cursor change-opacity" alt="" /></span>
-          <span title="Short break"><img src="images/short-break.png" id="shortbreak-mode"class="btn-change-cursor" alt="" /></span>
-          <span title="Long break"><img src="images/walker.png" id="longbreak-mode"class="btn-change-cursor"alt="" /></span>
-          <span title="Settings"><img src="images/settings.png" id="settings-mode"class="btn-change-cursor"alt="" /></span>
+      <div
+        class="right-panel"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 120px;
+          height: 280px;
+          background-color: transparent;
+        "
+      >
+        <div style="display: none">
+          <span title="Focus mode"
+            ><img
+              src="images/time.png"
+              id="focus-mode"
+              class="btn-change-cursor change-opacity"
+              alt=""
+          /></span>
+          <span title="Short break"
+            ><img
+              src="images/short-break.png"
+              id="shortbreak-mode"
+              class="btn-change-cursor"
+              alt=""
+          /></span>
+          <span title="Long break"
+            ><img
+              src="images/walker.png"
+              id="longbreak-mode"
+              class="btn-change-cursor"
+              alt=""
+          /></span>
+          <span title="Settings"
+            ><img
+              src="images/settings.png"
+              id="settings-mode"
+              class="btn-change-cursor"
+              alt=""
+          /></span>
         </div>
-        
+
         <!-- Daily Goal Progress Circle -->
-        <div id="daily-goal-container" class="btn-change-cursor" title="Daily Session Goal (Click to cycle modes, Right-click for Settings)" style="position: relative; width: 120px; height: 120px;">
-          <svg width="120" height="120" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
-            <circle stroke="#ffffff15" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-            <circle id="goal-circle" stroke="#256faf" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out; stroke-dasharray: 314.159; stroke-dashoffset: 314.159;"/>
+        <div
+          id="daily-goal-container"
+          class="btn-change-cursor"
+          title="Daily Session Goal (Click to cycle modes, Right-click for Settings)"
+          style="position: relative; width: 120px; height: 120px"
+        >
+          <svg
+            width="120"
+            height="120"
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              transform: rotate(-90deg);
+            "
+          >
+            <circle
+              stroke="#ffffff15"
+              stroke-width="8"
+              fill="transparent"
+              r="50"
+              cx="60"
+              cy="60"
+            />
+            <circle
+              id="goal-circle"
+              stroke="#256faf"
+              stroke-width="8"
+              fill="transparent"
+              r="50"
+              cx="60"
+              cy="60"
+              stroke-linecap="round"
+              style="
+                transition: stroke-dashoffset 1s ease-out;
+                stroke-dasharray: 314.159;
+                stroke-dashoffset: 314.159;
+              "
+            />
           </svg>
-          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <span id="big-session-count" style="font-size: 40px; font-weight: 800; color: #ffffff; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">0</span>
-            <span style="font-size: 14px; font-weight: 600; color: #ffffff88; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px;">/ <span id="daily-goal-text">50</span></span>
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <span
+              id="big-session-count"
+              style="
+                font-size: 40px;
+                font-weight: 800;
+                color: #ffffff;
+                line-height: 1;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+              "
+              >0</span
+            >
+            <span
+              style="
+                font-size: 14px;
+                font-weight: 600;
+                color: #ffffff88;
+                text-transform: uppercase;
+                margin-top: 4px;
+                letter-spacing: 0.5px;
+              "
+              >/ <span id="daily-goal-text">50</span></span
+            >
           </div>
         </div>
 
-        <!-- Chat Button -->
-        <div id="chat-btn" title="Open Assistant (C)" style="margin-top: 15px; cursor: pointer; font-size: 24px; color: #ffffffb3; background: #fff3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; outline: none; align-self: center;" tabindex="0">
-          💬
-        </div>
-
         <!-- Project Selection -->
-        <div id="project-selection" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; align-self: flex-start; margin-left: 10px;">
+        <div
+          id="project-selection"
+          style="
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-self: flex-start;
+            margin-left: 10px;
+          "
+        >
           <!-- Dynamically populated by setupProjectLabels() -->
         </div>
       </div>

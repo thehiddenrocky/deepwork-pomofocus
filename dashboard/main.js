@@ -169,3 +169,87 @@ function renderGitHubHeatmap(gridData, sessionCount, datesInBlock) {
         }
     }
 }
+
+// Chat Functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const chatBubble = document.getElementById('chat-bubble');
+    const chatPanel = document.getElementById('chat-panel');
+    const closeChat = document.getElementById('close-chat');
+    const chatInput = document.getElementById('chat-input');
+    const sendChat = document.getElementById('send-chat');
+    const chatMessages = document.getElementById('chat-messages');
+
+    if (chatBubble) {
+        chatBubble.addEventListener('click', () => {
+            chatPanel.classList.toggle('active');
+            if (chatPanel.classList.contains('active')) {
+                chatInput.focus();
+            }
+        });
+    }
+
+    if (closeChat) {
+        closeChat.addEventListener('click', () => {
+            chatPanel.classList.remove('active');
+        });
+    }
+
+    async function handleSendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Add user message
+        addMessage(text, true);
+        chatInput.value = '';
+
+        // Show typing indicator
+        const typingId = addMessage('...', false, true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            
+            // Remove typing indicator and add bot message
+            document.getElementById(typingId).remove();
+            addMessage(data.reply);
+        } catch (err) {
+            document.getElementById(typingId).remove();
+            addMessage('Error: Could not connect to the assistant.');
+            console.error(err);
+        }
+    }
+
+    function addMessage(text, isUser = false, isTyping = false) {
+        const msgDiv = document.createElement('div');
+        const id = 'msg-' + Date.now();
+        msgDiv.id = id;
+        msgDiv.classList.add('message');
+        msgDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+        
+        // Simple markdown-ish processing
+        let processedText = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\n/g, '<br>');
+            
+        msgDiv.innerHTML = processedText;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return id;
+    }
+
+    if (sendChat) {
+        sendChat.addEventListener('click', handleSendMessage);
+    }
+
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+    }
+});
