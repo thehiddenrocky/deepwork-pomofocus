@@ -523,6 +523,10 @@ document.addEventListener("keydown", (e) => {
   if (ctrlOrCmd) {
     if (e.key.toLowerCase() === "r") {
       e.preventDefault();
+      // Clear session state so it's not saved by beforeunload
+      currentSessionStartTime = null;
+      pendingLog = null;
+      localStorage.removeItem('pendingLog');
       ipcRenderer.send("ReloadMain");
       return;
     } else if (e.key.toLowerCase() === "q") {
