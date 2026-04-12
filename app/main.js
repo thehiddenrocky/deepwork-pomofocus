@@ -88,10 +88,10 @@ ipcMain.on("openSettings", () => {
   }
 
   SettingWin = new BrowserWindow({
-    parent: mainWindow,
     height: 500,
     width: 350,
     frame: false,
+    alwaysOnTop: !!(data && data.always_on_top),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -99,6 +99,12 @@ ipcMain.on("openSettings", () => {
     },
     resizable: false,
   });
+
+  if (data && data.always_on_top && process.platform === "darwin") {
+    SettingWin.setAlwaysOnTop(true, "floating", 1);
+    SettingWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  }
+
   SettingWin.loadFile("settings/index.html");
 });
 
