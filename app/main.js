@@ -127,6 +127,16 @@ ipcMain.on("ReloadMain", () => {
   app.quit();
 });
 
+ipcMain.on("toggle-focus-mode", (event, isFocusMode) => {
+  if (mainWindow) {
+    if (isFocusMode) {
+      mainWindow.setSize(200, 200);
+    } else {
+      mainWindow.setSize(460, 380);
+    }
+  }
+});
+
 // Notifications
 ipcMain.on("ShowNotification_focus", () => {
   NOTIFICATION_TITLE = "PomoFocus!";

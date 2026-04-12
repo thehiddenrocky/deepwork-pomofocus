@@ -215,6 +215,16 @@ function setupNoteInput() {
         noteInput.blur();
         showAcknowledgment();
       }
+
+      // Auto-start timer and jump back to focus mode after logging
+      // Wait for the session count animation to play before shrinking
+      setTimeout(() => {
+        if (start_btn.innerHTML === "Start") {
+          toggleTimer(); // This now automatically enters focus mode too
+        } else if (!document.body.classList.contains("focus-mode")) {
+          toggleFocusMode();
+        }
+      }, 1000);
     };
 
     // Add click listener to the tick
@@ -243,10 +253,22 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNoteInput();
   setupProjectLabels();
   
-  // Auto-focus note input when the app gains focus
+  // Auto-focus note input and handle ringing state when the app gains focus
   window.addEventListener('focus', () => {
-    const noteInput = document.getElementById("log-note");
-    if (noteInput) noteInput.focus();
+    // If alarm is ringing, stop it and exit focus mode to show the log input
+    if (alarm && !alarm.paused) {
+      stopAlarm();
+      if (document.body.classList.contains("focus-mode")) {
+        // Pass true to skipAutoFocus so the toggle button doesn't steal focus
+        toggleFocusMode(true);
+      }
+    }
+
+    // Now focus the note input with a slight delay to ensure the UI has transitioned
+    setTimeout(() => {
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) noteInput.focus();
+    }, 100);
   });
 
   // Auto-stop alarm when user starts typing in the note input
@@ -268,10 +290,22 @@ if (document.readyState === "loading") {
   setupProjectLabels();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
   
-  // Auto-focus note input when the app gains focus
+  // Auto-focus note input and handle ringing state when the app gains focus
   window.addEventListener('focus', () => {
-    const noteInput = document.getElementById("log-note");
-    if (noteInput) noteInput.focus();
+    // If alarm is ringing, stop it and exit focus mode to show the log input
+    if (alarm && !alarm.paused) {
+      stopAlarm();
+      if (document.body.classList.contains("focus-mode")) {
+        // Pass true to skipAutoFocus so the toggle button doesn't steal focus
+        toggleFocusMode(true);
+      }
+    }
+
+    // Now focus the note input with a slight delay to ensure the UI has transitioned
+    setTimeout(() => {
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) noteInput.focus();
+    }, 100);
   });
 
   // Auto-stop alarm when user starts typing in the note input
@@ -517,10 +551,52 @@ function updateDailyTotal() {
   }
 }
 
+function toggleFocusMode(skipAutoFocus = false) {
+  const body = document.body;
+  body.classList.toggle("focus-mode");
+  const isFocusMode = body.classList.contains("focus-mode");
+  ipcRenderer.send("toggle-focus-mode", isFocusMode);
+
+  if (skipAutoFocus) return;
+
+  // Maintain focus for keyboard users
+  setTimeout(() => {
+    if (isFocusMode) {
+      const exitBtn = document.getElementById("focus-exit");
+      if (exitBtn) exitBtn.focus();
+    } else {
+      const enterBtn = document.getElementById("focus-enter");
+      if (enterBtn) enterBtn.focus();
+    }
+  }, 50);
+}
+
 // Initial update
 document.addEventListener('DOMContentLoaded', () => {
   updateDailyTotal();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
+  
+  const focusEnterBtn = document.getElementById("focus-enter");
+  if (focusEnterBtn) {
+    focusEnterBtn.addEventListener("click", () => toggleFocusMode());
+    focusEnterBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFocusMode();
+      }
+    });
+  }
+  
+  const focusExitBtn = document.getElementById("focus-exit");
+  if (focusExitBtn) {
+    focusExitBtn.addEventListener("click", () => toggleFocusMode());
+    focusExitBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFocusMode();
+      }
+    });
+  }
 });
 
 function check_timer_text() {
@@ -609,6 +685,28 @@ document.addEventListener("keydown", (e) => {
 
   if (inNote) return;
 
+  // Auto-exit focus mode when typing
+  if (document.body.classList.contains("focus-mode")) {
+    // If it's a printable character (length 1) and no special modifiers are held
+    // excluding 'f' (toggle), ' ' (timer), and 'k' (mute) which have their own logic
+    const isShortcut = e.key.toLowerCase() === 'f' || e.key === ' ' || e.key.toLowerCase() === 'k';
+    if (e.key.length === 1 && !ctrlOrCmd && !e.altKey && !isShortcut) {
+      toggleFocusMode(true); // Exit focus mode, skip auto-focusing the toggle button
+      stopAlarm();
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) {
+        noteInput.focus();
+        // The character will naturally be inserted into the focused input
+      }
+    }
+  }
+
+  if (e.key.toLowerCase() === "f" && !ctrlOrCmd) {
+    e.preventDefault();
+    toggleFocusMode();
+    return;
+  }
+
   const isRadio = document.activeElement.tagName === "INPUT" && document.activeElement.type === "radio";
   if (isRadio && (e.key === " " || e.key.startsWith("Arrow"))) return;
 
@@ -641,6 +739,11 @@ function toggleTimer() {
     start_btn.innerHTML = "Pause";
     check_timer_text();
     startTimer();
+    
+    // Automatically enter focus mode if not already in it
+    if (!document.body.classList.contains("focus-mode")) {
+      toggleFocusMode();
+    }
   } else {
     PauseTimer();
   }
