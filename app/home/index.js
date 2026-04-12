@@ -215,6 +215,16 @@ function setupNoteInput() {
         noteInput.blur();
         showAcknowledgment();
       }
+
+      // Auto-start timer and jump back to focus mode after logging
+      // Wait for the session count animation to play before shrinking
+      setTimeout(() => {
+        if (start_btn.innerHTML === "Start") {
+          toggleTimer(); // This now automatically enters focus mode too
+        } else if (!document.body.classList.contains("focus-mode")) {
+          toggleFocusMode();
+        }
+      }, 1000);
     };
 
     // Add click listener to the tick
