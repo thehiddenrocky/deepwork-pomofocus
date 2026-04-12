@@ -253,10 +253,22 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNoteInput();
   setupProjectLabels();
   
-  // Auto-focus note input when the app gains focus
+  // Auto-focus note input and handle ringing state when the app gains focus
   window.addEventListener('focus', () => {
-    const noteInput = document.getElementById("log-note");
-    if (noteInput) noteInput.focus();
+    // If alarm is ringing, stop it and exit focus mode to show the log input
+    if (alarm && !alarm.paused) {
+      stopAlarm();
+      if (document.body.classList.contains("focus-mode")) {
+        // Pass true to skipAutoFocus so the toggle button doesn't steal focus
+        toggleFocusMode(true);
+      }
+    }
+
+    // Now focus the note input with a slight delay to ensure the UI has transitioned
+    setTimeout(() => {
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) noteInput.focus();
+    }, 100);
   });
 
   // Auto-stop alarm when user starts typing in the note input
@@ -278,10 +290,22 @@ if (document.readyState === "loading") {
   setupProjectLabels();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
   
-  // Auto-focus note input when the app gains focus
+  // Auto-focus note input and handle ringing state when the app gains focus
   window.addEventListener('focus', () => {
-    const noteInput = document.getElementById("log-note");
-    if (noteInput) noteInput.focus();
+    // If alarm is ringing, stop it and exit focus mode to show the log input
+    if (alarm && !alarm.paused) {
+      stopAlarm();
+      if (document.body.classList.contains("focus-mode")) {
+        // Pass true to skipAutoFocus so the toggle button doesn't steal focus
+        toggleFocusMode(true);
+      }
+    }
+
+    // Now focus the note input with a slight delay to ensure the UI has transitioned
+    setTimeout(() => {
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) noteInput.focus();
+    }, 100);
   });
 
   // Auto-stop alarm when user starts typing in the note input
