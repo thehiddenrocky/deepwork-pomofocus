@@ -647,6 +647,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+document.addEventListener("keydown", (e) => {
+  const inNote = document.activeElement.id === "log-note";
+  const ctrlOrCmd = e.ctrlKey || e.metaKey;
+
+  // We could add more shortcuts here
+}, true);
+
 function startTimer() {
   // Removed auto-commit of pendingLog here.
   // The user must manually log the session by entering a note and pressing Enter.

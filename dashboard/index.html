@@ -56,6 +56,26 @@
         </section>
     </div>
 
+    <!-- Floating Chat Button -->
+    <div id="chat-bubble" class="chat-bubble" title="Ask Assistant">
+        💬
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="chat-panel" class="chat-panel">
+        <div class="chat-header">
+            <h3>Deep Work Assistant</h3>
+            <button id="close-chat">&times;</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <div class="message bot-message">Assistant active. I've indexed your logs. How can I help you optimize your deep work today?</div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask about your focus patterns...">
+            <button id="send-chat">Send</button>
+        </div>
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>
