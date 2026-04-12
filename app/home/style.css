@@ -260,6 +260,13 @@ body {
 }
 
 /* Focus Mode */
+.focus-enter:focus,
+#focus-exit:focus {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 body.focus-mode .titlebar,
 body.focus-mode #daily-total,
 body.focus-mode #start-btn,

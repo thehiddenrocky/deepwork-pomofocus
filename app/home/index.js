@@ -522,6 +522,17 @@ function toggleFocusMode() {
   body.classList.toggle("focus-mode");
   const isFocusMode = body.classList.contains("focus-mode");
   ipcRenderer.send("toggle-focus-mode", isFocusMode);
+
+  // Maintain focus for keyboard users
+  setTimeout(() => {
+    if (isFocusMode) {
+      const exitBtn = document.getElementById("focus-exit");
+      if (exitBtn) exitBtn.focus();
+    } else {
+      const enterBtn = document.getElementById("focus-enter");
+      if (enterBtn) enterBtn.focus();
+    }
+  }, 50);
 }
 
 // Initial update
@@ -532,11 +543,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const focusEnterBtn = document.getElementById("focus-enter");
   if (focusEnterBtn) {
     focusEnterBtn.addEventListener("click", toggleFocusMode);
+    focusEnterBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFocusMode();
+      }
+    });
   }
   
   const focusExitBtn = document.getElementById("focus-exit");
   if (focusExitBtn) {
     focusExitBtn.addEventListener("click", toggleFocusMode);
+    focusExitBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFocusMode();
+      }
+    });
   }
 });
 
