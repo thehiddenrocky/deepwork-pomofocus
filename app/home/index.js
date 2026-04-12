@@ -517,10 +517,27 @@ function updateDailyTotal() {
   }
 }
 
+function toggleFocusMode() {
+  const body = document.body;
+  body.classList.toggle("focus-mode");
+  const isFocusMode = body.classList.contains("focus-mode");
+  ipcRenderer.send("toggle-focus-mode", isFocusMode);
+}
+
 // Initial update
 document.addEventListener('DOMContentLoaded', () => {
   updateDailyTotal();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
+  
+  const focusEnterBtn = document.getElementById("focus-enter");
+  if (focusEnterBtn) {
+    focusEnterBtn.addEventListener("click", toggleFocusMode);
+  }
+  
+  const focusExitBtn = document.getElementById("focus-exit");
+  if (focusExitBtn) {
+    focusExitBtn.addEventListener("click", toggleFocusMode);
+  }
 });
 
 function check_timer_text() {
@@ -596,6 +613,10 @@ document.addEventListener("keydown", (e) => {
       e.preventDefault();
       const noteInput = document.getElementById("log-note");
       if (noteInput) noteInput.focus();
+      return;
+    } else if (e.key.toLowerCase() === "f" && e.altKey) {
+      e.preventDefault();
+      toggleFocusMode();
       return;
     }
   }

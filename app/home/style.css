@@ -259,3 +259,41 @@ body {
   color: #ffffff;
 }
 
+/* Focus Mode */
+body.focus-mode .titlebar,
+body.focus-mode #daily-total,
+body.focus-mode #start-btn,
+body.focus-mode .right-panel,
+body.focus-mode #log-note,
+body.focus-mode #log-submit,
+body.focus-mode #debug-text,
+body.focus-mode #daily-goal-container,
+body.focus-mode #project-selection,
+body.focus-mode .left-content > div:nth-last-child(1) {
+  display: none !important;
+}
+
+body.focus-mode .page {
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+body.focus-mode .left-content {
+  margin: 0;
+  padding: 0;
+  -webkit-app-region: drag;
+}
+
+body.focus-mode .left-content > div:nth-child(3) {
+  margin: 0 !important;
+}
+
+body.focus-mode .timer {
+  font-size: 55px !important;
+}
+
+body.focus-mode #focus-exit {
+  display: block !important;
+}
+
