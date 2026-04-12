@@ -705,6 +705,11 @@ function toggleTimer() {
     start_btn.innerHTML = "Pause";
     check_timer_text();
     startTimer();
+    
+    // Automatically enter focus mode if not already in it
+    if (!document.body.classList.contains("focus-mode")) {
+      toggleFocusMode();
+    }
   } else {
     PauseTimer();
   }
