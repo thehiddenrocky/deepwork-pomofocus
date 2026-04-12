@@ -637,10 +637,6 @@ document.addEventListener("keydown", (e) => {
       const noteInput = document.getElementById("log-note");
       if (noteInput) noteInput.focus();
       return;
-    } else if (e.key.toLowerCase() === "f" && e.altKey) {
-      e.preventDefault();
-      toggleFocusMode();
-      return;
     }
   }
 
@@ -652,6 +648,12 @@ document.addEventListener("keydown", (e) => {
   }
 
   if (inNote) return;
+
+  if (e.key.toLowerCase() === "f" && !ctrlOrCmd) {
+    e.preventDefault();
+    toggleFocusMode();
+    return;
+  }
 
   const isRadio = document.activeElement.tagName === "INPUT" && document.activeElement.type === "radio";
   if (isRadio && (e.key === " " || e.key.startsWith("Arrow"))) return;
