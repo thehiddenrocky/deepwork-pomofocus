@@ -242,6 +242,22 @@ function setupNoteInput() {
 document.addEventListener('DOMContentLoaded', () => {
   setupNoteInput();
   setupProjectLabels();
+  
+  // Auto-focus note input when the app gains focus
+  window.addEventListener('focus', () => {
+    const noteInput = document.getElementById("log-note");
+    if (noteInput) noteInput.focus();
+  });
+
+  // Auto-stop alarm when user starts typing in the note input
+  const noteInput = document.getElementById("log-note");
+  if (noteInput) {
+    noteInput.addEventListener("input", () => {
+      if (alarm && !alarm.paused) {
+        stopAlarm();
+      }
+    });
+  }
 });
 
 // Also setup immediately if DOM is already loaded
@@ -251,6 +267,22 @@ if (document.readyState === "loading") {
   setupNoteInput();
   setupProjectLabels();
   if (window.updateProgressRing) window.updateProgressRing(1, 1);
+  
+  // Auto-focus note input when the app gains focus
+  window.addEventListener('focus', () => {
+    const noteInput = document.getElementById("log-note");
+    if (noteInput) noteInput.focus();
+  });
+
+  // Auto-stop alarm when user starts typing in the note input
+  const noteInput = document.getElementById("log-note");
+  if (noteInput) {
+    noteInput.addEventListener("input", () => {
+      if (alarm && !alarm.paused) {
+        stopAlarm();
+      }
+    });
+  }
 }
 
 function logSession(shouldFocus = true) {
@@ -502,12 +534,16 @@ workCount = 0;
 document.addEventListener("keydown", (e) => {
   const inNote = document.activeElement.id === "log-note";
 
-  // Global acknowledge: If alarm is ringing, 'k' stops it without typing in the note
+  // Global acknowledge: If alarm is ringing, 'k' stops it
   if (e.key.toLowerCase() === "k" && alarm && !alarm.paused) {
-    e.preventDefault();
-    e.stopPropagation(); // Stop it from reaching the note input
-    stopAlarm();
-    return;
+    if (!inNote) {
+      e.preventDefault();
+      e.stopPropagation();
+      stopAlarm();
+      return;
+    }
+    // If inNote is true, we let the keypress pass through so 'k' is typed.
+    // The input event listener we added will handle stopping the alarm.
   }
 
   // Escape to blur the note input
