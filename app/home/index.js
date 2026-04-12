@@ -517,11 +517,13 @@ function updateDailyTotal() {
   }
 }
 
-function toggleFocusMode() {
+function toggleFocusMode(skipAutoFocus = false) {
   const body = document.body;
   body.classList.toggle("focus-mode");
   const isFocusMode = body.classList.contains("focus-mode");
   ipcRenderer.send("toggle-focus-mode", isFocusMode);
+
+  if (skipAutoFocus) return;
 
   // Maintain focus for keyboard users
   setTimeout(() => {
@@ -542,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const focusEnterBtn = document.getElementById("focus-enter");
   if (focusEnterBtn) {
-    focusEnterBtn.addEventListener("click", toggleFocusMode);
+    focusEnterBtn.addEventListener("click", () => toggleFocusMode());
     focusEnterBtn.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -553,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const focusExitBtn = document.getElementById("focus-exit");
   if (focusExitBtn) {
-    focusExitBtn.addEventListener("click", toggleFocusMode);
+    focusExitBtn.addEventListener("click", () => toggleFocusMode());
     focusExitBtn.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -648,6 +650,22 @@ document.addEventListener("keydown", (e) => {
   }
 
   if (inNote) return;
+
+  // Auto-exit focus mode when typing
+  if (document.body.classList.contains("focus-mode")) {
+    // If it's a printable character (length 1) and no special modifiers are held
+    // excluding 'f' (toggle), ' ' (timer), and 'k' (mute) which have their own logic
+    const isShortcut = e.key.toLowerCase() === 'f' || e.key === ' ' || e.key.toLowerCase() === 'k';
+    if (e.key.length === 1 && !ctrlOrCmd && !e.altKey && !isShortcut) {
+      toggleFocusMode(true); // Exit focus mode, skip auto-focusing the toggle button
+      stopAlarm();
+      const noteInput = document.getElementById("log-note");
+      if (noteInput) {
+        noteInput.focus();
+        // The character will naturally be inserted into the focused input
+      }
+    }
+  }
 
   if (e.key.toLowerCase() === "f" && !ctrlOrCmd) {
     e.preventDefault();
